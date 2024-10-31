@@ -88,9 +88,13 @@ def pregunta_4():
     print("Pregunta 4")
     #Dada una matriz leerla de manera serpentine
 
-def pregunta_4():
+def pregunta_5():
     print("Pregunta 5")
+    print("Este script permite cambiar la imagen a blanco y negro")
 
+    path = input("Introduce el directorio relativo de la imagen: ")
+    ffmpeg.input(path).filter("format", "gray").output('output_bw.jpg').run()
+    
 def pregunta_6():
     print("Pregunta 6")
     directorio = input("Introduce el directorio relativo de un archivo .txt conteniendo el stream de datos:")
@@ -143,6 +147,9 @@ def main():
            
         elif opcion == "4":
             pregunta_4()
+        
+        elif opcion == "5":
+            pregunta_5()
         
         elif opcion == "6":
             pregunta_6()
