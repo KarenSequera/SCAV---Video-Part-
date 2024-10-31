@@ -1,5 +1,6 @@
 #Imports
 import ffmpeg
+import numpy
 
 class ColorYUV:
 
@@ -86,7 +87,15 @@ def pregunta_3():
 
 def pregunta_4():
     print("Pregunta 4")
-    #Dada una matriz leerla de manera serpentine
+    #Dada una matriz 8 x 8 leerla de manera serpentine
+    directorio = input("Introduce el directorio relativo de la matriz: ")
+    archivo = open(directorio, 'r')
+    numero_filas = len(archivo.readlines())
+    print(numero_filas)
+    matrix = []
+    for i in range(numero_filas):
+        matrix[i] = archivo.readline()
+        print(matrix[i])
 
 def pregunta_5():
     print("Pregunta 5")
@@ -96,6 +105,7 @@ def pregunta_5():
     ffmpeg.input(path).filter("format", "gray").output('output_bw.jpg').run()
     
 def pregunta_6():
+    #TODO: CERRAR LOS ARCHIVOS
     print("Pregunta 6")
     directorio = input("Introduce el directorio relativo de un archivo .txt conteniendo el stream de datos:")
     
