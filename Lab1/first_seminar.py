@@ -86,6 +86,7 @@ def pregunta_3():
 
 def pregunta_4():
     print("Pregunta 4")
+    #Dada una matriz leerla de manera serpentine
 
 def pregunta_4():
     print("Pregunta 5")
@@ -93,23 +94,27 @@ def pregunta_4():
 def pregunta_6():
     print("Pregunta 6")
     directorio = input("Introduce el directorio relativo de un archivo .txt conteniendo el stream de datos:")
-    with open(directorio, 'r') as archivo:
-        data_stream = [int(numero) for numero in archivo.read().split()]
     
-    output_stream = []
+    input_stream = open(directorio, 'r')
+    data_stream = input_stream.read()
+
     count = 0
+    output = open("output.txt",'w')
     for i in data_stream:
-        if i == 0:
+        if i == "0":
             count += 1
-        elif i != 0 and count > 0:
-            output_stream.append(0)
-            output_stream.append(count)
-            output_stream.append(i)
+        elif i != "0" and count > 0 and i != " ":
+            output.write("0")
+            output.write(str(" "))
+            output.write(str(count))
+            output.write(str(" "))
+            output.write(str(i))
             count = 0
+        elif i != "0" and count > 0 and i == " ":
+            pass
         else:
-            output_stream.append(i)
-                    
-   
+            output.write(str(i))
+        
 def main():
     print("Lab 1")
     opcion = "1"
@@ -119,10 +124,14 @@ def main():
         print("1) Pregunta 1")
         print("2) Pregunta 2")
         print("3) Pregunta 3")
-
+        print("4) Pregunta 4")
+        print("5) Pregunta 5")
+        print("6) Pregunta 6")
 
         opcion = input("Selecciona el número de pregunta que deseas:")
         
+
+        #TODO: Cambiar a un switch!!!!
         if opcion == "1":
             pregunta_1()
         
