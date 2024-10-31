@@ -86,6 +86,29 @@ def pregunta_3():
 
 def pregunta_4():
     print("Pregunta 4")
+
+def pregunta_4():
+    print("Pregunta 5")
+
+def pregunta_6():
+    print("Pregunta 6")
+    directorio = input("Introduce el directorio relativo de un archivo .txt conteniendo el stream de datos:")
+    with open(directorio, 'r') as archivo:
+        data_stream = [int(numero) for numero in archivo.read().split()]
+    
+    output_stream = []
+    count = 0
+    for i in data_stream:
+        if i == 0:
+            count += 1
+        elif i != 0 and count > 0:
+            output_stream.append(0)
+            output_stream.append(count)
+            output_stream.append(i)
+            count = 0
+        else:
+            output_stream.append(i)
+                    
    
 def main():
     print("Lab 1")
@@ -107,7 +130,13 @@ def main():
             pregunta_2()
         
         elif opcion == "3":
-            pregunta_2()
+            pregunta_3()
+           
+        elif opcion == "4":
+            pregunta_4()
+        
+        elif opcion == "6":
+            pregunta_6()
 
         elif opcion != "0":
             print("Selecciona una opción valida.")
