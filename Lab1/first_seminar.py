@@ -1,4 +1,6 @@
 #Imports
+import ffmpeg
+
 class ColorYUV:
 
     #Atributos de la clase
@@ -31,8 +33,12 @@ class ColorRGB:
         V = 0.439*self.R - 0.368*self.G - 0.071*self.B + 128
         color_yuv = ColorYUV(Y,U,V)
         return color_yuv
+def pregunta_1():
+    #En esta pregunta hay que comprobar la versión de ffmpeg
+    ffmpeg
 
-def main():
+def pregunta_2():
+    print("Pregunta 2")
     opcion = "a"
     while opcion != "c":
         print("Este script permite convertir los colores de formato RGB a formato YUV y viceversa")
@@ -65,6 +71,47 @@ def main():
         
         elif opcion != "c":
             print("Selecciona una opción válida")
+
+
+def pregunta_3():
+    print("Pregunta 3")
+    print("Este script permite cambiar la resolución de una imagen.")
+
+    path = input("Introduce el directorio relativo de la imagen: ")
+
+    ancho = int(input("Introduce el número de pixeles  para el ancho: "))
+    alto = int(input("Introduce el número de pixeles  para el alto: "))
+
+    ffmpeg.input(path).output('output.jpg', vf=f'scale={ancho}:{alto}').run()
+
+def pregunta_4():
+    print("Pregunta 4")
+   
+def main():
+    print("Lab 1")
+    opcion = "1"
+    while opcion != "0":  
+        print("Hay una función por cada pregunta, a que pregunta deseas acceder?")
+        print("0) Salir del script")
+        print("1) Pregunta 1")
+        print("2) Pregunta 2")
+        print("3) Pregunta 3")
+
+
+        opcion = input("Selecciona el número de pregunta que deseas:")
+        
+        if opcion == "1":
+            pregunta_1()
+        
+        elif opcion == "2":
+            pregunta_2()
+        
+        elif opcion == "3":
+            pregunta_2()
+
+        elif opcion != "0":
+            print("Selecciona una opción valida.")
+    
 
 if __name__ == '__main__':
     main()
