@@ -2,46 +2,58 @@
 import ffmpeg
 import numpy
 
+##############################################################
+##### Clases para la pregunta 2
+
+##Esta clase almacena colores en formato YUV y tiene un método para convertirlos en RGB
 class ColorYUV:
 
-    #Atributos de la clase
+    #Atributos de la clase, los 3 valores
     def __init__(self, Y,U, V):
         self.Y = Y
         self.U = U
         self.V = V
 
-    #Función para obtener el color en sistema 
+    #Función para obtener el color en sistema RGB, usa la formula proporcionada en las slides.
     def yuv_to_rgb(self):
         R = 1.164 * (self.Y - 16) + 1.596 * (self.V - 128)
         G = 1.164 * (self.Y - 16) - 0.813 * (self.V - 128) - 0.391 * (self.U - 128)
         B = 1.164 * (self.Y - 16) + 2.018 * (self.U - 128)
+
+        #El color se devuelve en un objeto de la clase ColorRGB (Definida abajo)
         color_rgb = ColorRGB(R,G,B)
         return color_rgb
 
-
+##Esta clase almacena colores en formato RGB y tiene un método para convertirlos en YUV
 class ColorRGB:
 
-    #Atributos de la clase
+   #Atributos de la clase, los 3 valores
     def __init__(self, R, G, B):
         self.R = R
         self.G = G
         self.B = B
 
-    #Función para obtener el color en sistema 
+     #Función para obtener el color en sistema YUV, usa la formula proporcionada en las slides.
     def rgb_to_yuv(self):
         Y = 0.257 * self.R + 0.504*self.G + 0.098*self.B + 16
         U = -0.148*self.R - 0.291*self.G + 0.439*self.B + 128
         V = 0.439*self.R - 0.368*self.G - 0.071*self.B + 128
+        
+        #El color se devuelve en un objeto de la clase ColorRGB (Definida abajo)
         color_yuv = ColorYUV(Y,U,V)
         return color_yuv
+    
+##############################################################
+##### Funciones para las diferentes preguntas
+
 def pregunta_1():
-    #En esta pregunta hay que comprobar la versión de ffmpeg
+    #En esta pregunta hay que comprobar la versión de ffmpeg. 
     ffmpeg
 
 def pregunta_2():
+
     print("Pregunta 2")
-    opcion = "a"
-    while opcion != "c":
+    while True:
         print("Este script permite convertir los colores de formato RGB a formato YUV y viceversa")
         print("a) De RGB a YUV")
         print("b) De YUV a RGB")
@@ -70,7 +82,10 @@ def pregunta_2():
             
             print(f"El color en RGB es R:{color_rgb.R} , G:{color_rgb.G} , B:{color_rgb.B}")
         
-        elif opcion != "c":
+        elif opcion == "c":
+           break
+        
+        else:
             print("Selecciona una opción válida")
 
 
@@ -131,8 +146,8 @@ def pregunta_6():
         
 def main():
     print("Lab 1")
-    opcion = "1"
-    while opcion != "0":  
+
+    while True:  
         print("Hay una función por cada pregunta, a que pregunta deseas acceder?")
         print("0) Salir del script")
         print("1) Pregunta 1")
@@ -143,29 +158,26 @@ def main():
         print("6) Pregunta 6")
 
         opcion = input("Selecciona el número de pregunta que deseas:")
-        
+       
+        match opcion:
+            case "0":
+                print("Saliendo del Script")
+                break
+            case "1":
+                pregunta_1()
+            case "2":
+                pregunta_2()
+            case "3":
+                pregunta_3()
+            case "4":
+                pregunta_4()
+            case "5":
+                pregunta_5()
+            case "6":
+                pregunta_6()
+            case _:
+                print("Selecciona una opción valida.")
 
-        #TODO: Cambiar a un switch!!!!
-        if opcion == "1":
-            pregunta_1()
-        
-        elif opcion == "2":
-            pregunta_2()
-        
-        elif opcion == "3":
-            pregunta_3()
-           
-        elif opcion == "4":
-            pregunta_4()
-        
-        elif opcion == "5":
-            pregunta_5()
-        
-        elif opcion == "6":
-            pregunta_6()
-
-        elif opcion != "0":
-            print("Selecciona una opción valida.")
     
 
 if __name__ == '__main__':
