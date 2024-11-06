@@ -102,15 +102,82 @@ def pregunta_3():
 
 def pregunta_4():
     print("Pregunta 4")
+    #Dada una matriz leerla de manera serpentine
+    print("Este script permite leer de manera 'serpentine' una imagen.")
+    #path = input("Introduce el directorio relativo de la imagen: ")
+    #matriz = input("Introduce una matriz a leer: ")
+
     #Dada una matriz 8 x 8 leerla de manera serpentine
-    directorio = input("Introduce el directorio relativo de la matriz: ")
-    archivo = open(directorio, 'r')
-    numero_filas = len(archivo.readlines())
-    print(numero_filas)
-    matrix = []
-    for i in range(numero_filas):
-        matrix[i] = archivo.readline()
-        print(matrix[i])
+    #directorio = input("Introduce el directorio relativo de la matriz: ")
+    #archivo = open(directorio, 'r')
+    #numero_filas = len(archivo.readlines())
+    #print(numero_filas)
+    #for i in range(numero_filas):
+        #matrix[i] = archivo.readline()
+        #print(matrix[i])
+
+    #Definimos la matriz a leer TODO: Cogerlo de un archivo 
+    matrix = [[1,2,6,7,14],[3,5,8,13,15],[4,9,12,16,19],[10,11,17,18,20]]
+
+    #Definimos las variables que contienen el numero máximo de filas y columnas
+    M = len(matrix)
+    N = len(matrix[0]) if M > 0 else 0
+
+    #Esta array va a contener los valores de la matriz en el orden de lectura "serpentine"
+    output = []
+
+    #Inicializamos los indices para leer la matriz
+    i, j = 0, 0  
+
+    #El numero de la iteración, va a definir el sentido de lectura de la "serpentine"
+    numero_iteracion = 1
+
+    #Hay tantas iteraciones como elementos de la matriz
+    while len(output) < M * N:
+        #Si estamos en una iteración par, leemos de arriba a abajo. El número de la columna (j) decrece y el de la fila (x) crece
+        if numero_iteracion % 2 == 0:
+            while i < M and j >= 0:
+                #Añadimos el valor actual al output y modificamos los indices acorde al orden de lectura
+                output.append(matrix[i][j])
+                i += 1
+                j -= 1
+                
+                #Si llegamos a los limites (primera columna o la ultima fila), se cambia el orden de lectura 
+                # y se avanza una posicion hacia abajo (si estamos en la primera columna) o una posicion a la derecha (si estamos)
+                if i == M or j < 0: 
+                    if j < 0 and i < M:
+                        #Como ya hemos avanzado una posicion en la i, solo hace falta que la que j sea 0
+                        j = 0
+                    else:  
+                        #Como se le ha restado una a la j anteriormente, hay que sumarle 2. Tenemos que quitarle lo que se le ha añadido a la i
+                        j += 2
+                        i -= 1
+                    numero_iteracion += 1
+                    break
+        
+        
+        else:
+            #Si estamos en una iteración impar, leemos de abajo a arriba. El número de la columna (j) crece y el de la fila (x) decrece.
+            while i >= 0 and j < N:
+                #Añadimos el valor actual al output y modificamos los indices acorde al orden de lectura
+                output.append(matrix[i][j])
+                i -= 1
+                j += 1
+                
+                #Si llegamos a los limites (primera fila o la ultima columna), se cambia el orden de lectura 
+                # y se avanza una posicion hacia abajo (si estamos en la última columna) o una posicion a la derecha (si estamos en la primera fila)
+                if i < 0 or j == N:  
+                    if i < 0 and j < N: 
+                        #Como ya se ha avanzado una posición de la j, solo hay que reiniciar la i a 0
+                        i = 0
+                    else:  
+                        #Como se le ha restado una a la i, para avanzar a la derecha hay que sumarle dos. Correjimos la cantidad añadida a la j
+                        i += 2
+                        j -= 1
+                    numero_iteracion += 1
+                    break
+    print("Ouput: ", output)
+
 
 def pregunta_5():
     print("Pregunta 5")
