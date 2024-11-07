@@ -1,0 +1,23 @@
+# Use the latest Alpine image as the base image
+FROM python:3.11-alpine
+
+# Set working directory inside the container
+WORKDIR /app
+
+# Install dependencies
+RUN apk update && apk add --no-cache \
+    python3-dev \
+    py3-pip \
+    build-base  
+
+# Upgrade pip to the latest version
+RUN pip install --no-cache-dir --upgrade pip
+
+# Copy the application code to the container
+COPY . /app
+
+# Install the required Python packages
+RUN pip install python-ffmpeg
+
+# Set the default command to run the app
+CMD ["python3", "ffmpeg"]

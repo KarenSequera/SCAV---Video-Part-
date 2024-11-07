@@ -2,6 +2,7 @@
 import ffmpeg
 import numpy as np
 from scipy.fftpack import dct, idct
+import pywt
 import matplotlib.pyplot as plt
 
 from skimage.io import imread
@@ -62,6 +63,20 @@ class DCT_Encoder:
     def decode(self):
         return idct(self.imagen_codificada)
 
+class DWT_Encoder:
+   #Atributos de la clase, tiene la imagen, la imagen codificada y el resultado de aplicar la inversa
+    def __init__(self, input):
+        self.imagen_original = input
+        self.imagen_codificada = self.encode()
+        self.imagen_reconstruida  = self.decode()
+
+     #Función para calcular la DCT
+    def encode(self):
+        return pywt.dwt2(self.imagen_original, 'haar')
+    
+    #Función para calcular la IDCT
+    def decode(self):
+        return pywt.idwt2(self.imagen_codificada, 'haar')
 
     
 ##############################################################
@@ -107,7 +122,7 @@ def pregunta_2():
            break
         
         else:
-            print("Selecciona una opción válida")
+            print("Selecciona una opción válida") 
 
 
 def pregunta_3():
@@ -243,6 +258,17 @@ def pregunta_7():
 
     plt.show()
 
+def pregunta_8():
+    print("Pregunta 8")  
+    path = input("Introduce el directorio relativo de la imagen: ")
+    encoder = DWT_Encoder(rgb2gray(imread(path)))
+    #
+    plt.gray()
+    plt.subplot(121), plt.imshow(encoder.imagen_original), plt.axis('off'), plt.title('Imagen original', size=20)
+    plt.subplot(122), plt.imshow(encoder.imagen_reconstruida), plt.axis('off'), plt.title('Imagen reconstruida(DWT+IDWT)', size=20)
+
+    plt.show()
+
 def main():
     print("Lab 1")
 
@@ -256,6 +282,7 @@ def main():
         print("5) Pregunta 5")
         print("6) Pregunta 6")
         print("7) Pregunta 7")
+        print("8) Pregunta 8")
 
         opcion = input("Selecciona el número de pregunta que deseas:")
        
@@ -277,6 +304,8 @@ def main():
                 pregunta_6()
             case "7":
                 pregunta_7()
+            case "8":
+                pregunta_8()
             case _:
                 print("Selecciona una opción valida.")
 
