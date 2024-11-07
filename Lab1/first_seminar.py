@@ -1,7 +1,11 @@
 #Imports
 import ffmpeg
-import numpy
+import numpy as np
+from scipy.fftpack import dct, idct
+import matplotlib.pyplot as plt
 
+from skimage.io import imread
+from skimage.color import rgb2gray
 ##############################################################
 ##### Clases para la pregunta 2
 
@@ -42,6 +46,21 @@ class ColorRGB:
         #El color se devuelve en un objeto de la clase ColorRGB (Definida abajo)
         color_yuv = ColorYUV(Y,U,V)
         return color_yuv
+
+class DCT_Encoder:
+   #Atributos de la clase, tiene la imagen, la imagen codificada y el resultado de aplicar la inversa
+    def __init__(self, input):
+        self.imagen_original = input
+        self.imagen_codificada = self.encode()
+        self.imagen_reconstruida  = self.decode()
+
+     #Función para calcular la DCT
+    def encode(self):
+        return dct(self.imagen_original)
+    
+    #Función para calcular la IDCT
+    def decode(self):
+        return idct(self.imagen_codificada)
     
 ##############################################################
 ##### Funciones para las diferentes preguntas
@@ -185,7 +204,7 @@ def pregunta_5():
 
     path = input("Introduce el directorio relativo de la imagen: ")
     ffmpeg.input(path).filter("format", "gray").output('output_bw.jpg').run()
-    
+
 def pregunta_6():
     #TODO: CERRAR LOS ARCHIVOS
     print("Pregunta 6")
@@ -210,7 +229,19 @@ def pregunta_6():
             pass
         else:
             output.write(str(i))
-        
+
+def pregunta_7():
+    print("Pregunta 7")  
+    path = input("Introduce el directorio relativo de la imagen: ")
+    encoder = DCT_Encoder(rgb2gray(imread(path)))
+    #
+    plt.gray()
+    plt.subplot(121), plt.imshow(encoder.imagen_original), plt.axis('off'), plt.title('Imagen original', size=20)
+    plt.subplot(122), plt.imshow(encoder.imagen_reconstruida), plt.axis('off'), plt.title('Imagen reconstruida(DCT+IDCT)', size=20)
+    plt.subplot(123), plt.imshow(encoder.imagen_codificada), plt.axis('off'), plt.title('Imagen reconstruida(DCT+IDCT)', size=20)
+
+    plt.show()
+
 def main():
     print("Lab 1")
 
@@ -223,6 +254,7 @@ def main():
         print("4) Pregunta 4")
         print("5) Pregunta 5")
         print("6) Pregunta 6")
+        print("7) Pregunta 7")
 
         opcion = input("Selecciona el número de pregunta que deseas:")
        
@@ -242,6 +274,8 @@ def main():
                 pregunta_5()
             case "6":
                 pregunta_6()
+            case "7":
+                pregunta_7()
             case _:
                 print("Selecciona una opción valida.")
 
