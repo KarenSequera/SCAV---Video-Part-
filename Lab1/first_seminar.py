@@ -61,6 +61,8 @@ class DCT_Encoder:
     #Función para calcular la IDCT
     def decode(self):
         return idct(self.imagen_codificada)
+
+
     
 ##############################################################
 ##### Funciones para las diferentes preguntas
