@@ -238,7 +238,6 @@ def pregunta_7():
     plt.gray()
     plt.subplot(121), plt.imshow(encoder.imagen_original), plt.axis('off'), plt.title('Imagen original', size=20)
     plt.subplot(122), plt.imshow(encoder.imagen_reconstruida), plt.axis('off'), plt.title('Imagen reconstruida(DCT+IDCT)', size=20)
-    plt.subplot(123), plt.imshow(encoder.imagen_codificada), plt.axis('off'), plt.title('Imagen reconstruida(DCT+IDCT)', size=20)
 
     plt.show()
 
