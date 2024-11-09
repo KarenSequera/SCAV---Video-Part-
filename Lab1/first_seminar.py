@@ -55,7 +55,7 @@ class DCT_Encoder:
         self.imagen_codificada = self.encode()
         self.imagen_reconstruida  = self.decode()
 
-     #Función para calcular la DCT
+    #Función para calcular la DCT
     def encode(self):
         return dct(self.imagen_original)
     
@@ -84,7 +84,12 @@ class DWT_Encoder:
 
 def pregunta_1():
     #En esta pregunta hay que comprobar la versión de ffmpeg. 
-    ffmpeg
+    #Esta funcion enseña la imagen de la primera linea que aparece en la consola al ejecutar "ffmpeg"
+    imagen = (imread("ffmpeg.jpg"))
+    
+    plt.figure()
+    plt.imshow(imagen), plt.axis('off'), plt.title('Version FFMPEG', size=20)
+    plt.show()
 
 def pregunta_2():
 
@@ -130,29 +135,25 @@ def pregunta_3():
     print("Este script permite cambiar la resolución de una imagen.")
 
     path = input("Introduce el directorio relativo de la imagen: ")
-
     ancho = int(input("Introduce el número de pixeles  para el ancho: "))
     alto = int(input("Introduce el número de pixeles  para el alto: "))
 
-    ffmpeg.input(path).output('output.jpg', vf=f'scale={ancho}:{alto}').run()
+    #Comando ffmpeg para cambiar la resolución de la imagen
+    ffmpeg.input(path).output('output_p3.jpg', vf=f'scale={ancho}:{alto}').run()
+
+    imagen_input = imread(path)
+    imagen_output = imread('output_p3.jpg')
+    
+    #Código para mostrar las imagenes
+    plt.figure()
+    plt.subplot(121), plt.imshow(imagen_input), plt.axis('off'), plt.title('Imagen original', size=20)
+    plt.subplot(122), plt.imshow(imagen_output), plt.axis('off'), plt.title(f'Imagen escala={ancho}x{alto}', size=20)
+    plt.show()
 
 def pregunta_4():
     print("Pregunta 4")
-    #Dada una matriz leerla de manera serpentine
-    print("Este script permite leer de manera 'serpentine' una imagen.")
-    #path = input("Introduce el directorio relativo de la imagen: ")
-    #matriz = input("Introduce una matriz a leer: ")
 
-    #Dada una matriz 8 x 8 leerla de manera serpentine
-    #directorio = input("Introduce el directorio relativo de la matriz: ")
-    #archivo = open(directorio, 'r')
-    #numero_filas = len(archivo.readlines())
-    #print(numero_filas)
-    #for i in range(numero_filas):
-        #matrix[i] = archivo.readline()
-        #print(matrix[i])
-
-    #Definimos la matriz a leer TODO: Cogerlo de un archivo 
+    #Definimos la matriz a leer
     matrix = [[1,2,6,7,14],[3,5,8,13,15],[4,9,12,16,19],[10,11,17,18,20]]
 
     #Definimos las variables que contienen el numero máximo de filas y columnas
@@ -182,15 +183,17 @@ def pregunta_4():
                 # y se avanza una posicion hacia abajo (si estamos en la primera columna) o una posicion a la derecha (si estamos)
                 if i == M or j < 0: 
                     if j < 0 and i < M:
+                        #Se avanza una posición hacía abajo
                         #Como ya hemos avanzado una posicion en la i, solo hace falta que la que j sea 0
                         j = 0
                     else:  
-                        #Como se le ha restado una a la j anteriormente, hay que sumarle 2. Tenemos que quitarle lo que se le ha añadido a la i
+                        #Se avanza una posición a la derecha
+                        #Como se le ha restado una a la j anteriormente, hay que sumarle 2. 
+                        #Tenemos que quitarle lo que se le ha añadido a la i
                         j += 2
                         i -= 1
                     numero_iteracion += 1
                     break
-        
         
         else:
             #Si estamos en una iteración impar, leemos de abajo a arriba. El número de la columna (j) crece y el de la fila (x) decrece.
@@ -204,14 +207,18 @@ def pregunta_4():
                 # y se avanza una posicion hacia abajo (si estamos en la última columna) o una posicion a la derecha (si estamos en la primera fila)
                 if i < 0 or j == N:  
                     if i < 0 and j < N: 
+                        #Se avanza una posición hacia abajo,
                         #Como ya se ha avanzado una posición de la j, solo hay que reiniciar la i a 0
                         i = 0
                     else:  
-                        #Como se le ha restado una a la i, para avanzar a la derecha hay que sumarle dos. Correjimos la cantidad añadida a la j
+                        #Se abanza una posición a la derecha
+                        #Como se le ha restado una a la i, para avanzar a la derecha hay que sumarle dos. 
+                        #Correjimos la cantidad añadida a la j
                         i += 2
                         j -= 1
                     numero_iteracion += 1
                     break
+                    
     print("Ouput: ", output)
 
 
@@ -220,31 +227,51 @@ def pregunta_5():
     print("Este script permite cambiar la imagen a blanco y negro")
 
     path = input("Introduce el directorio relativo de la imagen: ")
-    ffmpeg.input(path).filter("format", "gray").output('output_bw.jpg').run()
+
+    #Comando ffmpeg para producir una imagen en blanco y negro
+    ffmpeg.input(path).filter("format", "gray").output('output_p5.jpg').run()
+
+    #Código para mostrar las imagenes
+    imagen_input = imread(path)
+    imagen_output = imread('output_p5.jpg')
+    plt.figure()
+    plt.subplot(121), plt.imshow(imagen_input), plt.axis('off'), plt.title('Imagen original', size=20)
+    plt.subplot(122), plt.imshow(imagen_output), plt.axis('off'), plt.title('Imagen BW', size=20)
+    plt.show()
 
 def pregunta_6():
-    #TODO: CERRAR LOS ARCHIVOS
     print("Pregunta 6")
     directorio = input("Introduce el directorio relativo de un archivo .txt conteniendo el stream de datos:")
     
+    #Abrir los archivos y guardar la secuencia de números, 
+    #Se asume que estan en el formato visualizado en las slides, separados por espacios
     input_stream = open(directorio, 'r')
     data_stream = input_stream.read()
 
+    #Variable para llevar la cuenta del número consecutivo de 0
     count = 0
+
     output = open("output.txt",'w')
     for i in data_stream:
         if i == "0":
+            #Si hay un cero la variable count augmenta
             count += 1
+
         elif i != "0" and count > 0 and i != " ":
+            #Si count es mayor a uno y el siguiente número no es cero, 
+            #hay que escribir en el output el número de ceros consecutivos "0 Count"
             output.write("0")
             output.write(str(" "))
             output.write(str(count))
             output.write(str(" "))
+            #Se escribe el número normalmente 
             output.write(str(i))
             count = 0
         elif i != "0" and count > 0 and i == " ":
+            #los espacios en blanco no cuenta
             pass
         else:
+            #Se escribe el número normalmente 
             output.write(str(i))
 
 def pregunta_7():
