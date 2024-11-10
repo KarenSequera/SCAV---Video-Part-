@@ -27,6 +27,7 @@ class Color_Translator:
     # -Y: Float conteniendo el valor Y del sistema YUV.
     # -U: Float conteniendo el valor U del sistema YUV.
     # -V: Float conteniendo el valor V del sistema YUV. 
+    @staticmethod
     def rgb_to_yuv(R,G,B):
         Y = 0.257 * R + 0.504*G + 0.098*B + 16
         U = -0.148*R - 0.291*G + 0.439*B + 128
@@ -37,7 +38,8 @@ class Color_Translator:
     #Método para obtener el color en sistema RGB dado YUV, usa la formula proporcionada en las slides.
     # -R: Float conteniendo el valor R del sistema RGB.
     # -G: Float conteniendo el valor G del sistema RGB.
-    # -B: Float conteniendo el valor B del sistema RGB.   
+    # -B: Float conteniendo el valor B del sistema RGB. 
+    @staticmethod  
     def yuv_to_rgb(Y,U,V):
         R = 1.164 * (Y - 16) + 1.596 * (V - 128)
         G = 1.164 * (Y - 16) - 0.813 * (V - 128) - 0.391 * (U - 128)
@@ -284,9 +286,11 @@ class DCT_Encoder:
     #             https://stackoverflow.com/questions/7110899/how-do-i-apply-a-dct-to-an-image-in-python
 
     #Función para calcular la DCT
+    @staticmethod
     def encode(imagen):
         return dct(dct(imagen.T, norm='ortho').T, norm='ortho')
     #Función para calcular la IDCT
+    @staticmethod
     def decode(imagen):
         return idct(idct(imagen.T, norm='ortho').T, norm='ortho')
 
@@ -317,11 +321,13 @@ class DWT_Encoder:
     #Referencias: https://pywavelets.readthedocs.io/en/latest/ref/2d-dwt-and-idwt.html
     #             https://pywavelets.readthedocs.io/en/latest/
 
-     #Función para calcular la DCT
+     #Función para calcular la DWT
+    @staticmethod
     def encode(imagen):
         return pywt.dwt2(imagen, 'bior1.3')
     
-    #Función para calcular la IDCT
+    #Función para calcular la IDWT
+    @staticmethod
     def decode(imagen):
         return pywt.idwt2(imagen, 'bior1.3')
 
@@ -336,7 +342,7 @@ def pregunta_8():
     #Código para mostrar las imagenes
     plt.gray()
     plt.subplot(121), plt.imshow(imagen), plt.axis('off'), plt.title('Imagen original', size=20)
-    plt.subplot(122), plt.imshow(imagen_decoded), plt.axis('off'), plt.title('Imagen reconstruida(DWT+IDWT)', size=20)
+    plt.subplot(122), plt.imshow(imagen_decoded), plt.axis('off'), plt.title('Imagen reconstruida (DWT+IDWT)', size=20)
 
     plt.show()
 
