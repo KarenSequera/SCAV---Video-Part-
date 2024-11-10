@@ -7,81 +7,8 @@ import matplotlib.pyplot as plt
 
 from skimage.io import imread
 from skimage.color import rgb2gray
-##############################################################
-##### Clases para la pregunta 2
 
-##Esta clase almacena colores en formato YUV y tiene un método para convertirlos en RGB
-class ColorYUV:
-
-    #Atributos de la clase, los 3 valores
-    def __init__(self, Y,U, V):
-        self.Y = Y
-        self.U = U
-        self.V = V
-
-    #Función para obtener el color en sistema RGB, usa la formula proporcionada en las slides.
-    def yuv_to_rgb(self):
-        R = 1.164 * (self.Y - 16) + 1.596 * (self.V - 128)
-        G = 1.164 * (self.Y - 16) - 0.813 * (self.V - 128) - 0.391 * (self.U - 128)
-        B = 1.164 * (self.Y - 16) + 2.018 * (self.U - 128)
-
-        #El color se devuelve en un objeto de la clase ColorRGB (Definida abajo)
-        color_rgb = ColorRGB(R,G,B)
-        return color_rgb
-
-##Esta clase almacena colores en formato RGB y tiene un método para convertirlos en YUV
-class ColorRGB:
-
-   #Atributos de la clase, los 3 valores
-    def __init__(self, R, G, B):
-        self.R = R
-        self.G = G
-        self.B = B
-
-     #Función para obtener el color en sistema YUV, usa la formula proporcionada en las slides.
-    def rgb_to_yuv(self):
-        Y = 0.257 * self.R + 0.504*self.G + 0.098*self.B + 16
-        U = -0.148*self.R - 0.291*self.G + 0.439*self.B + 128
-        V = 0.439*self.R - 0.368*self.G - 0.071*self.B + 128
-        
-        #El color se devuelve en un objeto de la clase ColorRGB (Definida abajo)
-        color_yuv = ColorYUV(Y,U,V)
-        return color_yuv
-
-class DCT_Encoder:
-   #Atributos de la clase, tiene la imagen, la imagen codificada y el resultado de aplicar la inversa
-    def __init__(self, input):
-        self.imagen_original = input
-        self.imagen_codificada = self.encode()
-        self.imagen_reconstruida  = self.decode()
-
-    #Función para calcular la DCT
-    def encode(self):
-        return dct(self.imagen_original)
-    
-    #Función para calcular la IDCT
-    def decode(self):
-        return idct(self.imagen_codificada)
-
-class DWT_Encoder:
-   #Atributos de la clase, tiene la imagen, la imagen codificada y el resultado de aplicar la inversa
-    def __init__(self, input):
-        self.imagen_original = input
-        self.imagen_codificada = self.encode()
-        self.imagen_reconstruida  = self.decode()
-
-     #Función para calcular la DCT
-    def encode(self):
-        return pywt.dwt2(self.imagen_original, 'haar')
-    
-    #Función para calcular la IDCT
-    def decode(self):
-        return pywt.idwt2(self.imagen_codificada, 'haar')
-
-    
-##############################################################
-##### Funciones para las diferentes preguntas
-
+## Pregunta 1
 def pregunta_1():
     #En esta pregunta hay que comprobar la versión de ffmpeg. 
     #Esta funcion enseña la imagen de la primera linea que aparece en la consola al ejecutar "ffmpeg"
@@ -91,8 +18,35 @@ def pregunta_1():
     plt.imshow(imagen), plt.axis('off'), plt.title('Version FFMPEG', size=20)
     plt.show()
 
-def pregunta_2():
+## Pregunta 2
 
+class Color_Translator:
+    #Los dos metodos asumen que el input es correcto (float)
+
+    #Método para obtener el color en sistema YUV dado RGB, usa la formula proporcionada en las slides.
+    # -Y: Float conteniendo el valor Y del sistema YUV.
+    # -U: Float conteniendo el valor U del sistema YUV.
+    # -V: Float conteniendo el valor V del sistema YUV. 
+    def rgb_to_yuv(R,G,B):
+        Y = 0.257 * R + 0.504*G + 0.098*B + 16
+        U = -0.148*R - 0.291*G + 0.439*B + 128
+        V = 0.439*R - 0.368*G - 0.071*B + 128
+        #El color YUV se devuelve en una lista
+        return [Y,U,V]
+    
+    #Método para obtener el color en sistema RGB dado YUV, usa la formula proporcionada en las slides.
+    # -R: Float conteniendo el valor R del sistema RGB.
+    # -G: Float conteniendo el valor G del sistema RGB.
+    # -B: Float conteniendo el valor B del sistema RGB.   
+    def yuv_to_rgb(Y,U,V):
+        R = 1.164 * (Y - 16) + 1.596 * (V - 128)
+        G = 1.164 * (Y - 16) - 0.813 * (V - 128) - 0.391 * (U - 128)
+        B = 1.164 * (Y - 16) + 2.018 * (U - 128)
+
+        #El color RGB se devuelve en una lista
+        return [R,G,B]
+    
+def pregunta_2():
     print("Pregunta 2")
     while True:
         print("Este script permite convertir los colores de formato RGB a formato YUV y viceversa")
@@ -107,10 +61,9 @@ def pregunta_2():
             G = float(input("Introduce el componente G del color: "))
             B = float(input("Introduce el componente B del color: "))
             
-            color_rgb = ColorRGB(R,G,B)
-            color_yuv = color_rgb.rgb_to_yuv()
+            color_yuv = Color_Translator.rgb_to_yuv(R,G,B)
             
-            print(f"El color en YUV es Y:{color_yuv.Y} , U:{color_yuv.U} , V:{color_yuv.V}")
+            print(f"El color en YUV es Y:{color_yuv[0]} , U:{color_yuv[1]} , V:{color_yuv[2]}")
         
         elif opcion == "b":
             print("Porfavor, usa . para los decimales.")
@@ -118,30 +71,37 @@ def pregunta_2():
             U = float(input("Introduce el componente U del color: "))
             V = float(input("Introduce el componente V del color: "))
             
-            color_yuv = ColorYUV(Y,U,V)
-            color_rgb = color_yuv.yuv_to_rgb()
+            color_rgb = Color_Translator.yuv_to_rgb(Y,U,V)
             
-            print(f"El color en RGB es R:{color_rgb.R} , G:{color_rgb.G} , B:{color_rgb.B}")
+            print(f"El color en RGB es R:{color_rgb[0]} , G:{color_rgb[1]} , B:{color_rgb[2]}")
         
         elif opcion == "c":
            break
         
         else:
-            print("Selecciona una opción válida") 
+            print("Selecciona una opción válida")
 
+## Pregunta 3
+#Esta función genera un comando de ffmpeg que dado:
+# -Directorio: Directorio relativo de la imagen, si esta en la misma carpeta el nombre del archivo es suficiente
+# -Ancho: Número de pixeles deseados para el ancho de la imagen
+# -Alto: Número de pixeles deseados para el alto de la imagen
+# Genera una imagen con las dimensiones deseadas
+def resolution_changer(directorio, ancho, alto):
+    ffmpeg.input(directorio).output('output_p3.jpg', vf=f'scale={ancho}:{alto}').run()
 
 def pregunta_3():
     print("Pregunta 3")
     print("Este script permite cambiar la resolución de una imagen.")
 
-    path = input("Introduce el directorio relativo de la imagen: ")
+    directorio = input("Introduce el directorio relativo de la imagen: ")
     ancho = int(input("Introduce el número de pixeles  para el ancho: "))
     alto = int(input("Introduce el número de pixeles  para el alto: "))
 
-    #Comando ffmpeg para cambiar la resolución de la imagen
-    ffmpeg.input(path).output('output_p3.jpg', vf=f'scale={ancho}:{alto}').run()
+    #Llamada a la función que cambia la resolució.
+    resolution_changer(directorio, ancho, alto)
 
-    imagen_input = imread(path)
+    imagen_input = imread(directorio)
     imagen_output = imread('output_p3.jpg')
     
     #Código para mostrar las imagenes
@@ -150,15 +110,15 @@ def pregunta_3():
     plt.subplot(122), plt.imshow(imagen_output), plt.axis('off'), plt.title(f'Imagen escala={ancho}x{alto}', size=20)
     plt.show()
 
-def pregunta_4():
-    print("Pregunta 4")
-
-    #Definimos la matriz a leer
-    matrix = [[1,2,6,7,14],[3,5,8,13,15],[4,9,12,16,19],[10,11,17,18,20]]
-
+## Pregunta 4
+# Esta función lee la matriz siguiendo el orden "Serpentine" establecido en las slides de clase
+# -Matriz: Se asume que es una Lista de Listas (matriz)
+# -output: Contiene el contenido de la matriz en orden "serpentine"
+def serpentine(matriz):
+    
     #Definimos las variables que contienen el numero máximo de filas y columnas
-    M = len(matrix)
-    N = len(matrix[0]) if M > 0 else 0
+    M = len(matriz)
+    N = len(matriz[0]) if M > 0 else 0
 
     #Esta array va a contener los valores de la matriz en el orden de lectura "serpentine"
     output = []
@@ -175,7 +135,7 @@ def pregunta_4():
         if numero_iteracion % 2 == 0:
             while i < M and j >= 0:
                 #Añadimos el valor actual al output y modificamos los indices acorde al orden de lectura
-                output.append(matrix[i][j])
+                output.append(matriz[i][j])
                 i += 1
                 j -= 1
                 
@@ -199,7 +159,7 @@ def pregunta_4():
             #Si estamos en una iteración impar, leemos de abajo a arriba. El número de la columna (j) crece y el de la fila (x) decrece.
             while i >= 0 and j < N:
                 #Añadimos el valor actual al output y modificamos los indices acorde al orden de lectura
-                output.append(matrix[i][j])
+                output.append(matriz[i][j])
                 i -= 1
                 j += 1
                 
@@ -218,84 +178,185 @@ def pregunta_4():
                         j -= 1
                     numero_iteracion += 1
                     break
-                    
+    return output
+
+def pregunta_4():
+    print("Pregunta 4")
+    matriz = [[1,2,6,7,14],[3,5,8,13,15],[4,9,12,16,19],[10,11,17,18,20]]
+    output = serpentine(matriz)
     print("Ouput: ", output)
 
+## Pregunta 5
+
+#Esta función genera un comando de ffmpeg que dado:
+# -Directorio: Directorio relativo de la imagen, si esta en la misma carpeta el nombre del archivo es suficiente
+# Genera una versión en blanco y negro de la imagen
+def bw_converter(directorio):
+    ffmpeg.input(directorio).filter("format", "gray").output('output_p5.jpg').run()
 
 def pregunta_5():
     print("Pregunta 5")
     print("Este script permite cambiar la imagen a blanco y negro")
 
-    path = input("Introduce el directorio relativo de la imagen: ")
-
-    #Comando ffmpeg para producir una imagen en blanco y negro
-    ffmpeg.input(path).filter("format", "gray").output('output_p5.jpg').run()
+    directorio = input("Introduce el directorio relativo de la imagen: ")
+    
+    bw_converter(directorio)
 
     #Código para mostrar las imagenes
-    imagen_input = imread(path)
+    imagen_input = imread(directorio)
     imagen_output = imread('output_p5.jpg')
     plt.figure()
     plt.subplot(121), plt.imshow(imagen_input), plt.axis('off'), plt.title('Imagen original', size=20)
     plt.subplot(122), plt.imshow(imagen_output), plt.axis('off'), plt.title('Imagen BW', size=20)
     plt.show()
 
-def pregunta_6():
-    print("Pregunta 6")
-    directorio = input("Introduce el directorio relativo de un archivo .txt conteniendo el stream de datos:")
-    
-    #Abrir los archivos y guardar la secuencia de números, 
-    #Se asume que estan en el formato visualizado en las slides, separados por espacios
+## Pregunta 6
+
+#Esta función dado un directorio conteniendo un data stream (.txt) en formato mostrado en las slides
+#es decir, números separados por espacios, los introduce en una lista.
+#  -Directorio: Directorio relativo de .txt, si esta en la misma carpeta el nombre del archivo es suficiente
+#  -Output_list: Lista con los contenidos del .txt
+def lector_data_stream(directorio):
     input_stream = open(directorio, 'r')
     data_stream = input_stream.read()
 
-    #Variable para llevar la cuenta del número consecutivo de 0
-    count = 0
+    output_list = []
+    item = ""
 
-    output = open("output.txt",'w')
     for i in data_stream:
-        if i == "0":
+        #Si no hay espacio en blanco, dos characteres consecutivos constituyen el mismo número
+        #Y se guardan en la misma posición de la lista
+        if i !=  " ":
+            item += i
+        
+        #Si encontramos un espacio en blanco, hay que almacenar el número y resetear 
+        # la variable que acomula los carácteres
+        else:
+            output_list.append(int(item))
+            item = ""
+    
+    #Si el último número no esta seguido de un espacio en blanco,
+    #no se añadirá. Comprobamos el caso manualmente
+    if item != "":
+        output_list.append(int(item))
+    
+    input_stream.close()
+    return output_list
+
+#Esta función implementa el run_lenght algoritmo presentado en las slides
+# - List: lista conteniendo el data stream al que se le desea aplicar el algoritmo
+# - output_list: Lista conteniendo el resultado. Las posiciones que contienen 0+Count, son strings.
+def run_lenght(list):
+    output_list = []
+    count = 0
+    for i in list:
+        if i == 0:
             #Si hay un cero la variable count augmenta
             count += 1
 
-        elif i != "0" and count > 0 and i != " ":
+        elif i != 0 and count > 0:
             #Si count es mayor a uno y el siguiente número no es cero, 
             #hay que escribir en el output el número de ceros consecutivos "0 Count"
-            output.write("0")
-            output.write(str(" "))
-            output.write(str(count))
-            output.write(str(" "))
+            output_list.append("0"+ str(count))
             #Se escribe el número normalmente 
-            output.write(str(i))
+            output_list.append(i)
             count = 0
-        elif i != "0" and count > 0 and i == " ":
-            #los espacios en blanco no cuenta
-            pass
         else:
             #Se escribe el número normalmente 
-            output.write(str(i))
+            output_list.append(int(i))
+
+    return output_list
+            
+def pregunta_6():
+    print("Pregunta 6")
+    directorio = input("Introduce el directorio relativo de un archivo .txt conteniendo el stream de datos:")
+    list = lector_data_stream(directorio)
+    output_list = run_lenght(list)
+    print(output_list)
+
+## Pregunta 7
+class DCT_Encoder:
+    #Nuestro encoder usa la implementación de la DCT y la IDCT de la libreria scipy.fftpack siguiendo un ejemplo de uso de
+    #Stack Overflow para imagenes
+    
+    #Referencias: https://docs.scipy.org/doc/scipy/reference/generated/scipy.fftpack.dct.html
+    #             https://docs.scipy.org/doc/scipy/reference/generated/scipy.fftpack.idct.html
+    #             https://stackoverflow.com/questions/7110899/how-do-i-apply-a-dct-to-an-image-in-python
+
+    #Función para calcular la DCT
+    def encode(imagen):
+        return dct(dct(imagen.T, norm='ortho').T, norm='ortho')
+    #Función para calcular la IDCT
+    def decode(imagen):
+        return idct(idct(imagen.T, norm='ortho').T, norm='ortho')
 
 def pregunta_7():
     print("Pregunta 7")  
     path = input("Introduce el directorio relativo de la imagen: ")
-    encoder = DCT_Encoder(rgb2gray(imread(path)))
-    #
-    plt.gray()
-    plt.subplot(121), plt.imshow(encoder.imagen_original), plt.axis('off'), plt.title('Imagen original', size=20)
-    plt.subplot(122), plt.imshow(encoder.imagen_reconstruida), plt.axis('off'), plt.title('Imagen reconstruida(DCT+IDCT)', size=20)
 
+    #En el ejemplo solo vamos a visualizar un canal, asi que usamos la imagen en blanco y negro
+    #Para usarlo en RGB hay que codificar cada uno de los canales.
+
+    imagen = (rgb2gray(imread(path)))
+    imagen_encoded = DCT_Encoder.encode(imagen)
+    imagen_decoded = DCT_Encoder.decode(imagen_encoded)
+
+    #Código para mostrar las imagenes
+    plt.gray()
+    plt.subplot(131), plt.imshow(imagen), plt.axis('off'), plt.title('Imagen original', size=20)
+    #Visualizamos la magnitud de la dct de manera logaritmica 
+    plt.subplot(132), plt.imshow(np.log(np.abs(imagen_encoded),),cmap='hot'), plt.axis('off'), plt.title('Coeficientes DCT (Escala log)', size=15)
+    plt.subplot(133), plt.imshow(imagen_decoded), plt.axis('off'), plt.title('Imagen reconstruida (DCT+IDCT)', size=20)
     plt.show()
+
+## Pregunta 8
+class DWT_Encoder:
+    #Nuestro encoder usa la implementación de la DWT y la IDWT de la libreria pwt siguiendo un ejemplo de uso de
+    #para imagenes de un blog de la propia libreria.
+    
+    #Referencias: https://pywavelets.readthedocs.io/en/latest/ref/2d-dwt-and-idwt.html
+    #             https://pywavelets.readthedocs.io/en/latest/
+
+     #Función para calcular la DCT
+    def encode(imagen):
+        return pywt.dwt2(imagen, 'bior1.3')
+    
+    #Función para calcular la IDCT
+    def decode(imagen):
+        return pywt.idwt2(imagen, 'bior1.3')
 
 def pregunta_8():
     print("Pregunta 8")  
     path = input("Introduce el directorio relativo de la imagen: ")
-    encoder = DWT_Encoder(rgb2gray(imread(path)))
-    #
+   
+    imagen = (rgb2gray(imread(path)))
+    imagen_encoded = DWT_Encoder.encode(imagen)
+    imagen_decoded = DWT_Encoder.decode(imagen_encoded)
+
+    #Código para mostrar las imagenes
     plt.gray()
-    plt.subplot(121), plt.imshow(encoder.imagen_original), plt.axis('off'), plt.title('Imagen original', size=20)
-    plt.subplot(122), plt.imshow(encoder.imagen_reconstruida), plt.axis('off'), plt.title('Imagen reconstruida(DWT+IDWT)', size=20)
+    plt.subplot(121), plt.imshow(imagen), plt.axis('off'), plt.title('Imagen original', size=20)
+    plt.subplot(122), plt.imshow(imagen_decoded), plt.axis('off'), plt.title('Imagen reconstruida(DWT+IDWT)', size=20)
 
     plt.show()
 
+    #Código para mostrar la decomposición 2D (extraido del blog)
+    titles = ['LL - Approximation', 'LH - Horizontal detail','HL - Vertical detail', 'HH - Diagonal detail']
+    LL, (LH, HL, HH) = imagen_encoded
+    fig = plt.figure(figsize=(12, 3))
+    for i, a in enumerate([LL, LH, HL, HH]):
+        ax = fig.add_subplot(1, 4, i + 1)
+        ax.imshow(a, interpolation="nearest", cmap=plt.cm.gray)
+        ax.set_title(titles[i], fontsize=10)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    fig.tight_layout()
+    plt.show()
+
+## El unit TEST esta en un archivo separado!
+
+###################
 def main():
     print("Lab 1")
 
@@ -313,31 +374,28 @@ def main():
 
         opcion = input("Selecciona el número de pregunta que deseas:")
        
-        match opcion:
-            case "0":
-                print("Saliendo del Script")
-                break
-            case "1":
-                pregunta_1()
-            case "2":
-                pregunta_2()
-            case "3":
-                pregunta_3()
-            case "4":
-                pregunta_4()
-            case "5":
-                pregunta_5()
-            case "6":
-                pregunta_6()
-            case "7":
-                pregunta_7()
-            case "8":
-                pregunta_8()
-            case _:
-                print("Selecciona una opción valida.")
+        if opcion == "0":
+            print("Saliendo del Script")
+            break
+        elif opcion == "1":
+            pregunta_1()
+        elif opcion == "2":
+            pregunta_2()
+        elif opcion == "3":
+            pregunta_3()
+        elif opcion == "4":
+            pregunta_4()
+        elif opcion == "5":
+            pregunta_5()
+        elif opcion == "6":
+            pregunta_6()
+        elif opcion == "7":
+            pregunta_7()
+        elif opcion == "8":
+            pregunta_8()
+        else:
+            print("Selecciona una opción válida.")
 
-    
 
 if __name__ == '__main__':
     main()
-
