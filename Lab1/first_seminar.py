@@ -89,8 +89,8 @@ def pregunta_2():
 # -Ancho: Número de pixeles deseados para el ancho de la imagen
 # -Alto: Número de pixeles deseados para el alto de la imagen
 # Genera una imagen con las dimensiones deseadas
-def resolution_changer(directorio, ancho, alto):
-    ffmpeg.input(directorio).output('output_p3.jpg', vf=f'scale={ancho}:{alto}').run()
+def resolution_changer(directorio, ancho, alto, output_name):
+    ffmpeg.input(directorio).output(output_name, vf=f'scale={ancho}:{alto}').run()
 
 def pregunta_3():
     print("Pregunta 3")
@@ -101,15 +101,15 @@ def pregunta_3():
     alto = int(input("Introduce el número de pixeles  para el alto: "))
 
     #Llamada a la función que cambia la resolució.
-    resolution_changer(directorio, ancho, alto)
+    resolution_changer(directorio, ancho, alto,'output_p3.jpg')
 
     imagen_input = imread(directorio)
     imagen_output = imread('output_p3.jpg')
     
     #Código para mostrar las imagenes
     plt.figure()
-    plt.subplot(121), plt.imshow(imagen_input), plt.axis('off'), plt.title('Imagen original', size=20)
-    plt.subplot(122), plt.imshow(imagen_output), plt.axis('off'), plt.title(f'Imagen escala={ancho}x{alto}', size=20)
+    plt.subplot(121), plt.imshow(imagen_input), plt.axis('off'), plt.title('Imagen original')
+    plt.subplot(122), plt.imshow(imagen_output), plt.axis('off'), plt.title(f'Imagen escala={ancho}x{alto}')
     plt.show()
 
 ## Pregunta 4
@@ -193,8 +193,8 @@ def pregunta_4():
 #Esta función genera un comando de ffmpeg que dado:
 # -Directorio: Directorio relativo de la imagen, si esta en la misma carpeta el nombre del archivo es suficiente
 # Genera una versión en blanco y negro de la imagen
-def bw_converter(directorio):
-    ffmpeg.input(directorio).filter("format", "gray").output('output_p5.jpg').run()
+def bw_converter(directorio, output_name):
+    ffmpeg.input(directorio).filter("format", "gray").output(output_name).run()
 
 def pregunta_5():
     print("Pregunta 5")
@@ -202,7 +202,7 @@ def pregunta_5():
 
     directorio = input("Introduce el directorio relativo de la imagen: ")
     
-    bw_converter(directorio)
+    bw_converter(directorio, 'output_p5.jpg')
 
     #Código para mostrar las imagenes
     imagen_input = imread(directorio)
