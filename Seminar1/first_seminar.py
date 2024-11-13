@@ -194,7 +194,7 @@ def pregunta_4():
 # -Directorio: Directorio relativo de la imagen, si esta en la misma carpeta el nombre del archivo es suficiente
 # Genera una versión en blanco y negro de la imagen
 def bw_converter(directorio, output_name):
-    ffmpeg.input(directorio).filter("format", "gray").output(output_name).run()
+    ffmpeg.input(directorio).filter("format", "gray").output(output_name, qscale = 10).run()
 
 def pregunta_5():
     print("\nPregunta 5")
