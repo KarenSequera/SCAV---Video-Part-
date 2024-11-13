@@ -218,6 +218,52 @@ def ejecutar_tests_dwt_encoder():
         fig.tight_layout()
         plt.show()
 
+class TestDCT_Slides(unittest.TestCase):
+
+    def setUp(self):
+        # Tres matrices de prueba adicionales 8x8
+        self.matrices = [
+            np.array([[1, 2, 3, 4, 5, 6, 7, 8],
+                      [1, 2, 3, 4, 5, 6, 7, 8],
+                      [1, 2, 3, 4, 5, 6, 7, 8],
+                      [1, 2, 3, 4, 5, 6, 7, 8],
+                      [1, 2, 3, 4, 5, 6, 7, 8],
+                      [1, 2, 3, 4, 5, 6, 7, 8],
+                      [1, 2, 3, 4, 5, 6, 7, 8],
+                      [1, 2, 3, 4, 5, 6, 7, 8]]),
+            
+            np.array([[0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 1, 2, 3, 4, 5, 6, 7],
+                      [0, 2, 4, 6, 8, 10, 12, 14],
+                      [0, 3, 6, 9, 12, 15, 18, 21],
+                      [0, 4, 8, 12, 16, 20, 24, 28],
+                      [0, 5, 10, 15, 20, 25, 30, 35],
+                      [0, 6, 12, 18, 24, 30, 36, 42],
+                      [0, 7, 14, 21, 28, 35, 42, 49]]),
+            
+            np.array([[255, 255, 255, 255, 255, 255, 255, 255],
+                      [255, 0,   0,   0,   0,   0,   0,   0],
+                      [255, 255, 0,   0,   0,   0,   0,   0],
+                      [255, 255, 255, 0,   0,   0,   0,   0],
+                      [255, 255, 255, 255, 0,   0,   0,   0],
+                      [255, 255, 255, 255, 255, 0,   0,   0],
+                      [255, 255, 255, 255, 255, 255, 0,   0],
+                      [255, 255, 255, 255, 255, 255, 255, 0]])
+        ]
+    
+    def test_dct_encoder_slides(self):
+        for matriz in self.matrices:
+            # DCT usando la implementación de first_seminar (supuestamente tu implementación)
+            dct_encoded_scipy = first_seminar.DCT_Encoder.encode(matriz)
+                
+            dct_encoded_manual = first_seminar.DCT_Encoder_SlidesFormula.encode(matriz)
+            dct_decoded_manual = first_seminar.DCT_Encoder_SlidesFormula.decode(dct_encoded_manual)
+                
+            # Comprobamos si los resultados de la DCT son lo suficientemente cercanos
+            np.testing.assert_allclose(dct_encoded_scipy, dct_encoded_manual, atol=1, err_msg=f"Error en DCT para la matriz:\n{matriz}")
+            np.testing.assert_allclose(matriz, dct_decoded_manual, atol=1, err_msg=f"Error en IDCT para la matriz:\n{matriz}")
+
+
 def main():
     while True:
         print("\nSeleccione los tests que desea ejecutar:")
@@ -229,6 +275,8 @@ def main():
         print("5) Tests para el cambiador a blanco y negro")
         print("6) Tests para el DCT encoder-decoder")
         print("7) Tests para el DWT encoder-decoder")
+        print("8) Tests para el DCT encoder-decoder - Versión formula slides (solo matrices)")
+
 
         choice = input("\nIngrese el número de la opción deseada: ")
 
@@ -262,7 +310,12 @@ def main():
         elif choice == '7':
             print("\nEjecutando pruebas de codificación y decodificación DWT...")
             ejecutar_tests_dwt_encoder()
-            
+
+        elif choice == '8':
+            print("\nEjecutando pruebas de DCT versión slides...")
+            suite = unittest.TestLoader().loadTestsFromTestCase(TestDCT_Slides)
+            unittest.TextTestRunner().run(suite)
+        
         elif choice == '0':
             print("Saliendo del programa...")
             break

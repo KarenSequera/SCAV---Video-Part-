@@ -277,6 +277,7 @@ def pregunta_6():
     print("\nEl output es:")
     print(output_list)
 
+
 ## Pregunta 7
 class DCT_Encoder:
     #Nuestro encoder usa la implementación de la DCT y la IDCT de la libreria scipy.fftpack siguiendo un ejemplo de uso de
@@ -313,6 +314,78 @@ def pregunta_7():
     plt.subplot(132), plt.imshow(np.log(np.abs(imagen_encoded),),cmap='hot'), plt.axis('off'), plt.title('Coeficientes DCT (Escala log)', size=15)
     plt.subplot(133), plt.imshow(imagen_decoded), plt.axis('off'), plt.title('Imagen reconstruida (DCT+IDCT)', size=20)
     plt.show()
+
+class DCT_Encoder_SlidesFormula:
+    #Función alpha, si el input es 0 tiene valor raiz(1/8), sino raiz(2/8)
+    def alpha(n):
+        if n == 0:
+            output = np.sqrt(1/8)
+        else:
+            output = np.sqrt(2/8)
+        return  output
+    
+    @staticmethod
+    #La formula de las slides esta pensada para matrices de 8x8, así que se asume que la matriz va a tener esas dimensiones
+    def encode(matrix): 
+
+        #Inicializamos la matriz que va a contener el output
+        G = np.zeros((8,8))
+        
+        #Ahora iteramos por cada uno de los "pixeles"/valores de la matriz (u y v en la formula)
+        for u in range(8):
+            for v in range(8):
+
+                coef = DCT_Encoder_SlidesFormula.alpha(u) * DCT_Encoder_SlidesFormula.alpha(v)
+                sum = 0
+
+                for x in range(8):
+                    for y in range(8):
+                        sum += matrix[x][y] * np.cos((np.pi / 8) * (x + 1/2) * u) * np.cos((np.pi / 8) * (y + 1/2) * v)
+                                                                                           
+                G[u][v] = coef * sum
+
+        return G 
+
+    @staticmethod
+    def decode(encoded_matrix):
+        # Inicializamos la matriz que va a contener el output
+        matrix = np.zeros((8, 8))
+
+        # Operación inversa para obtener los valores iniciales de la matriz
+        # Referencias: Hemos adaptado la formula de la idct de la pagina 14 para que se adecue al ejemplo de las slides de clase (8x8)
+        #              https://es.slideshare.net/slideshow/discrete-cosine-transform/13643007#14
+
+        for x in range(8):
+            for y in range(8):
+                
+                sum = 0
+                for u in range(8):
+                    for v in range(8):
+                        coef = DCT_Encoder_SlidesFormula.alpha(u) * DCT_Encoder_SlidesFormula.alpha(v)
+                        sum += coef * encoded_matrix[u][v] * np.cos((np.pi / 8) * (x + 1/2) * u) * np.cos((np.pi / 8) * (y + 1/2) * v)
+
+                matrix[x][y] = sum
+
+        return matrix
+    
+
+def pregunta_7_manual():
+    print("\nPregunta 7 - versión manual de la dct") 
+    matriz = [[72, 70, 65, 65, 66, 68,  0,  0],
+              [71, 65, 65, 63, 64, 67,  0,  0],
+              [73, 66, 67, 65, 66, 69,  0,  0],
+              [75, 65, 66, 64, 64, 63,  0,  0],
+              [72, 68, 63, 62, 61, 60,  0,  0],
+              [0,   0,  0,  0,  0,  0,  0,  0],
+              [0,   0,  0,  0,  0,  0,  0,  0],
+              [0,   0,  0, 0,   0,  0,  0,  0]]
+    
+    matriz_encoded = DCT_Encoder_SlidesFormula.encode(matriz)
+    print("\nLa dct de la matriz introducida es: ") 
+    print(matriz_encoded)
+    matriz_decoded = DCT_Encoder_SlidesFormula.decode(matriz_encoded)
+    print("\nLa dct de la matriz introducida es: ")
+    print(matriz_decoded)
 
 ## Pregunta 8
 class DWT_Encoder:
@@ -378,6 +451,8 @@ def main():
         print("6) Pregunta 6")
         print("7) Pregunta 7")
         print("8) Pregunta 8")
+        print("9) Pregunta 7 - Implementación slides (funciona solo matrices)")
+
 
         opcion = input("\nSelecciona el número de pregunta que deseas:")
        
@@ -400,6 +475,8 @@ def main():
             pregunta_7()
         elif opcion == "8":
             pregunta_8()
+        elif opcion == "9":
+            pregunta_7_manual()
         else:
             print("\nSelecciona una opción válida.")
 
