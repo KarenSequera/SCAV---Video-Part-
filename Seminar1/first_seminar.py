@@ -49,33 +49,33 @@ class Color_Translator:
         return [R,G,B]
     
 def pregunta_2():
-    print("Pregunta 2")
+    print("\nPregunta 2")
     while True:
-        print("Este script permite convertir los colores de formato RGB a formato YUV y viceversa")
+        print("\nEste script permite convertir los colores de formato RGB a formato YUV y viceversa")
         print("a) De RGB a YUV")
         print("b) De YUV a RGB")
         print("c) salir")
-        opcion = input("Introduce la opción deseada: ")
+        opcion = input("\nIntroduce la opción deseada: ")
 
         if opcion == "a":
-            print("Porfavor, usa . para los decimales.")
+            print("\nPorfavor, usa . para los decimales.")
             R = float(input("Introduce el componente R del color: "))
             G = float(input("Introduce el componente G del color: "))
             B = float(input("Introduce el componente B del color: "))
             
             color_yuv = Color_Translator.rgb_to_yuv(R,G,B)
             
-            print(f"El color en YUV es Y:{color_yuv[0]} , U:{color_yuv[1]} , V:{color_yuv[2]}")
+            print(f"\nEl color en YUV es Y:{color_yuv[0]} , U:{color_yuv[1]} , V:{color_yuv[2]}")
         
         elif opcion == "b":
-            print("Porfavor, usa . para los decimales.")
+            print("\nPorfavor, usa . para los decimales.")
             Y = float(input("Introduce el componente Y del color: "))
             U = float(input("Introduce el componente U del color: "))
             V = float(input("Introduce el componente V del color: "))
             
             color_rgb = Color_Translator.yuv_to_rgb(Y,U,V)
             
-            print(f"El color en RGB es R:{color_rgb[0]} , G:{color_rgb[1]} , B:{color_rgb[2]}")
+            print(f"\nEl color en RGB es R:{color_rgb[0]} , G:{color_rgb[1]} , B:{color_rgb[2]}")
         
         elif opcion == "c":
            break
@@ -93,8 +93,8 @@ def resolution_changer(directorio, ancho, alto, output_name):
     ffmpeg.input(directorio).output(output_name, vf=f'scale={ancho}:{alto}').run()
 
 def pregunta_3():
-    print("Pregunta 3")
-    print("Este script permite cambiar la resolución de una imagen.")
+    print("\nPregunta 3")
+    print("\nEste script permite cambiar la resolución de una imagen.")
 
     directorio = input("Introduce el directorio relativo de la imagen: ")
     ancho = int(input("Introduce el número de pixeles  para el ancho: "))
@@ -183,7 +183,7 @@ def serpentine(matriz):
     return output
 
 def pregunta_4():
-    print("Pregunta 4")
+    print("\nPregunta 4")
     matriz = [[1,2,6,7,14],[3,5,8,13,15],[4,9,12,16,19],[10,11,17,18,20]]
     output = serpentine(matriz)
     print("Ouput: ", output)
@@ -197,8 +197,8 @@ def bw_converter(directorio, output_name):
     ffmpeg.input(directorio).filter("format", "gray").output(output_name).run()
 
 def pregunta_5():
-    print("Pregunta 5")
-    print("Este script permite cambiar la imagen a blanco y negro")
+    print("\nPregunta 5")
+    print("\nEste script permite cambiar la imagen a blanco y negro")
 
     directorio = input("Introduce el directorio relativo de la imagen: ")
     
@@ -270,10 +270,11 @@ def run_lenght(list):
     return output_list
             
 def pregunta_6():
-    print("Pregunta 6")
-    directorio = input("Introduce el directorio relativo de un archivo .txt conteniendo el stream de datos:")
+    print("\nPregunta 6")
+    directorio = input("\nIntroduce el directorio relativo de un archivo .txt conteniendo el stream de datos:")
     list = lector_data_stream(directorio)
     output_list = run_lenght(list)
+    print("\nEl output es:")
     print(output_list)
 
 ## Pregunta 7
@@ -295,8 +296,8 @@ class DCT_Encoder:
         return idct(idct(imagen.T, norm='ortho').T, norm='ortho')
 
 def pregunta_7():
-    print("Pregunta 7")  
-    path = input("Introduce el directorio relativo de la imagen: ")
+    print("\nPregunta 7")  
+    path = input("\nIntroduce el directorio relativo de la imagen: ")
 
     #En el ejemplo solo vamos a visualizar un canal, asi que usamos la imagen en blanco y negro
     #Para usarlo en RGB hay que codificar cada uno de los canales.
@@ -332,8 +333,8 @@ class DWT_Encoder:
         return pywt.idwt2(imagen, 'bior1.3')
 
 def pregunta_8():
-    print("Pregunta 8")  
-    path = input("Introduce el directorio relativo de la imagen: ")
+    print("\nPregunta 8")  
+    path = input("\nIntroduce el directorio relativo de la imagen: ")
    
     imagen = (rgb2gray(imread(path)))
     imagen_encoded = DWT_Encoder.encode(imagen)
@@ -367,7 +368,7 @@ def main():
     print("Lab 1")
 
     while True:  
-        print("Hay una función por cada pregunta, a que pregunta deseas acceder?")
+        print("\nHay una función por cada pregunta, a que pregunta deseas acceder?")
         print("0) Salir del script")
         print("1) Pregunta 1")
         print("2) Pregunta 2")
@@ -378,10 +379,10 @@ def main():
         print("7) Pregunta 7")
         print("8) Pregunta 8")
 
-        opcion = input("Selecciona el número de pregunta que deseas:")
+        opcion = input("\nSelecciona el número de pregunta que deseas:")
        
         if opcion == "0":
-            print("Saliendo del Script")
+            print("\nSaliendo del Script")
             break
         elif opcion == "1":
             pregunta_1()
@@ -400,7 +401,7 @@ def main():
         elif opcion == "8":
             pregunta_8()
         else:
-            print("Selecciona una opción válida.")
+            print("\nSelecciona una opción válida.")
 
 
 if __name__ == '__main__':
