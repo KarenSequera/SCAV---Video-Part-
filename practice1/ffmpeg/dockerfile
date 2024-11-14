@@ -1,0 +1,12 @@
+# Contenedor con base UBUNTU
+FROM ubuntu:20.04
+
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    sudo \
+    curl \
+    && apt-get clean
+
+WORKDIR /workspace
+
+CMD ["bash"]

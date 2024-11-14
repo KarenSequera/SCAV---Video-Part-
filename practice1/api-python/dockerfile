@@ -8,7 +8,8 @@ WORKDIR /app
 RUN apk update && apk add --no-cache \
     python3-dev \
     py3-pip \
-    build-base  
+    build-base \
+    docker 
 
 # Upgrade pip to the latest version
 RUN pip install --no-cache-dir --upgrade pip

@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import subprocess
 
 app = Flask(__name__)
 
@@ -133,7 +134,7 @@ def serpentine():
         return jsonify({'error': str(e)}), 400
     
 #Comando PowerShell para probarlo
-#Invoke-WebRequest -Uri http://localhost:5000/serpentine -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"matriz":[[1,2,6,7,14],[3,5,8,13,15],[4,9,12,16,19],[10,11,17,18,20]]}' -ContentType "application/json"
+#Invoke-WebRequest -Uri http://localhost:5000/serpentine -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Matriz":[[1,2,6,7,14],[3,5,8,13,15],[4,9,12,16,19],[10,11,17,18,20]]}' -ContentType "application/json"
 
 @app.route('/run_lenght', methods=['POST'])
 def run_lenght():
@@ -166,6 +167,30 @@ def run_lenght():
     
 #Comando PowerShell para probarlo    
 #Invoke-WebRequest -Uri http://localhost:5000/run_lenght -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Data_stream":[0, 0, 3, 4, 8, 6, 33, 0, 0, 0, 4]}' -ContentType "application/json"
+
+
+@app.route('/bw_converter', methods=['POST'])
+def bw_converter():
+    data = request.get_json() 
+    try:
+        directorio_input = data['Directorio Input']
+        directorio_output =  data['Directorio Output'] 
+        ##ffmpeg.input(directorio).filter("format", "gray").output(output_name, qscale = 10).run()
+        # Usar el nombre del contenedor como hostname
+        command = ["docker", "run", "--rm", "practice1-ffmpeg", "ffmpeg", "-i", directorio_input, "-vf", "format=gray", directorio_output]
+        #command = ["/bin/sh"]
+
+        
+        subprocess.run(command, check=True)
+
+        return jsonify({
+            'Msj': f"La imagen en blanco y negro se encuentra en {directorio_output}",
+        })
+        
+    except (ValueError, TypeError) as e:
+        return jsonify({'error': str(e)}), 400
+
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)

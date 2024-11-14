@@ -1,0 +1,33 @@
+version: '3'
+services:
+  ffmpeg:
+    build:
+      context: ./ffmpeg
+    container_name: contenedor_ffmpeg
+    networks:
+      - app-network
+    command: ["bash"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Asegura que ffmpeg también pueda acceder al docker daemon
+      - ./shared:/shared 
+  api-python:
+    build:
+      context: ./api-python
+    container_name: api_python
+    depends_on:
+      - ffmpeg
+    networks:
+      - app-network
+    ports:
+      - "5000:5000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Monta el socket de Docker aquí también
+      - ./api-python:/app  # Asegúrate de que los archivos de tu app estén disponibles dentro del contenedor
+      - ./shared:/shared 
+
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock  # Instruye al contenedor Flask a usar el socket
+
+networks:
+  app-network:
+    driver: bridge
