@@ -1,12 +1,15 @@
 # Contenedor con base UBUNTU
 FROM ubuntu:20.04
 
+# Hay que instalar ffmpeg, curl por si necesitamos realizar alguna prueba y actualizar todo 
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     sudo \
     curl \
     && apt-get clean
 
+# Define el directorio de trabajo
 WORKDIR /workspace
 
+# Define el comando de inicio (puedes agregarlo más tarde si es necesario)
 CMD ["bash"]

@@ -31,6 +31,8 @@ def rgb_to_yuv():
 #Comando PowerShell para probarlo
 #Invoke-WebRequest -Uri http://localhost:5000/rgb_to_yuv -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"R":255,"G":100,"B":50}' -ContentType "application/json"
 
+##############################################
+
 ## YUV to RBG
 @app.route('/yuv_to_rgb', methods=['POST'])
 def yuv_to_rgb():
@@ -58,6 +60,8 @@ def yuv_to_rgb():
 
 #Comando PowerShell para probarlo
 #Invoke-WebRequest -Uri http://localhost:5000/yuv_to_rgb -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Y":128,"U":128,"V":128}' -ContentType "application/json"
+
+##############################################
 
 @app.route('/serpentine', methods=['POST'])
 def serpentine():
@@ -136,6 +140,8 @@ def serpentine():
 #Comando PowerShell para probarlo
 #Invoke-WebRequest -Uri http://localhost:5000/serpentine -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Matriz":[[1,2,6,7,14],[3,5,8,13,15],[4,9,12,16,19],[10,11,17,18,20]]}' -ContentType "application/json"
 
+##############################################
+
 @app.route('/run_lenght', methods=['POST'])
 def run_lenght():
     data = request.get_json() 
@@ -168,19 +174,23 @@ def run_lenght():
 #Comando PowerShell para probarlo    
 #Invoke-WebRequest -Uri http://localhost:5000/run_lenght -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Data_stream":[0, 0, 3, 4, 8, 6, 33, 0, 0, 0, 4]}' -ContentType "application/json"
 
+##############################################
+
 
 @app.route('/bw_converter', methods=['POST'])
 def bw_converter():
     data = request.get_json() 
     try:
-        directorio_input = data['Directorio Input']
-        directorio_output =  data['Directorio Output'] 
-        ##ffmpeg.input(directorio).filter("format", "gray").output(output_name, qscale = 10).run()
-        # Usar el nombre del contenedor como hostname
-        command = ["docker", "run", "--rm", "practice1-ffmpeg", "ffmpeg", "-i", directorio_input, "-vf", "format=gray", directorio_output]
-        #command = ["/bin/sh"]
-
+        #Las imagenes tienen que estar localizadas en el directorio "shared", si no los contenedores no serán capaces de acceder a ellas
+        nombre_input = data['Nombre Input']
+        nombre_output =  data['Nombre Output'] 
         
+        directorio_input = "/shared/" + nombre_input
+        directorio_output = "/shared/" + nombre_output
+
+        #Construcción de una lista de strings conteniendo el comando
+        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorio_input , "-vf", "format=gray", directorio_output]
+
         subprocess.run(command, check=True)
 
         return jsonify({

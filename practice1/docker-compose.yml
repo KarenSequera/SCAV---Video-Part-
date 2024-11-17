@@ -6,10 +6,12 @@ services:
     container_name: contenedor_ffmpeg
     networks:
       - app-network
-    command: ["bash"]
+    #Comando para que el contenedor este siempre ejecutandose y no se detenga
+    command: ["bash", "-c", "tail -f /dev/null"]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # Asegura que ffmpeg también pueda acceder al docker daemon
       - ./shared:/shared 
+
   api-python:
     build:
       context: ./api-python
