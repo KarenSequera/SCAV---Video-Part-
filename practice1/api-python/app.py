@@ -4,6 +4,7 @@ from scipy.fftpack import dct, idct
 import pywt
 from skimage.io import imread
 from skimage.color import rgb2gray
+import matplotlib.pyplot as plt
 
 import subprocess
 
@@ -286,12 +287,8 @@ def resolution_changer():
 
         directorio_input = "/shared/" + nombre_input
         directorio_output = "/shared/" + nombre_output
-        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorio_input , "-vf", f"scale={ancho}:{alto}", directorio_output]
-        try: 
-            subprocess.run(command, check=True)
-        except:
-            return jsonify({'Error': 'Asegurate de que el archivo de output no existe!'}), 400
-        #funcion_resolution_changer(directorio_input, directorio_output, ancho, alto)
+        
+        funcion_resolution_changer(directorio_input, directorio_output, ancho, alto)
         
         return jsonify({
             'Msj': f"La imagen en blanco y negro se encuentra en {directorio_output}",
@@ -305,7 +302,7 @@ def resolution_changer():
 
 ##############################################
 
-class DCT_Encoder:
+class DCT_Encoder_Class:
     #Nuestro encoder usa la implementación de la DCT y la IDCT de la libreria scipy.fftpack siguiendo un ejemplo de uso de
     #Stack Overflow para imagenes
     
@@ -321,6 +318,108 @@ class DCT_Encoder:
     @staticmethod
     def metodo_decode(imagen):
         return idct(idct(imagen.T, norm='ortho').T, norm='ortho')
+    
+
+@app.route('/dct_encoder', methods=['POST'])
+def dct_encoder():
+    data = request.get_json() 
+    try:
+        #Las imagenes tienen que estar localizadas en el directorio "shared", si no los contenedores no serán capaces de acceder a ellas
+        nombre_input = data['Nombre Input']
+
+        directorio_input = "/shared/" + nombre_input
+        directorio_output = "/shared/DCT/"
+        imagen = (rgb2gray(imread(directorio_input)))
+        imagen_encoded = DCT_Encoder_Class.metodo_encode(imagen)
+        imagen_decoded = DCT_Encoder_Class.metodo_decode(imagen_encoded)
+        
+        #En el lab anterior haciamos plots de las imagenes, docker no tiene acceso a la pantalla asi que no podemos realizarlos
+        #En su lugar, los resultados se guardaran en la carpeta compartida
+        #Código para mostrar las imagenes
+        plt.figure(figsize=(15, 5))
+        plt.gray()
+        plt.subplot(131), plt.imshow(imagen), plt.axis('off'), plt.title('Imagen original', size=20)
+        #Visualizamos la magnitud de la dct de manera logaritmica 
+        plt.subplot(132), plt.imshow(np.log(np.abs(imagen_encoded),),cmap='hot'), plt.axis('off'), plt.title('Coeficientes DCT (Escala log)', size=15)
+        plt.subplot(133), plt.imshow(imagen_decoded), plt.axis('off'), plt.title('Imagen reconstruida (DCT+IDCT)', size=20)
+
+        #En lugar de plt.show(), guardamos el grafico
+        plt.savefig(f'{directorio_output}outputDCT.png', bbox_inches='tight')
+        plt.close() 
+
+        return jsonify({
+            'Msj': f"El resultado se encuenta en el directorio{directorio_output}",
+        })
+        
+    except (ValueError, TypeError) as e:
+        return jsonify({'error': str(e)}), 400
+
+#Comando PowerShell para probarlo
+#Invoke-WebRequest -Uri http://localhost:5000/dct_encoder -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Nombre Input": "input.jpg"}' -ContentType "application/json"
+
+##############################################
+
+
+class DWT_Encoder_Class:
+    #Nuestro encoder usa la implementación de la DWT y la IDWT de la libreria pwt siguiendo un ejemplo de uso de
+    #para imagenes de un blog de la propia libreria.
+    
+    #Referencias: https://pywavelets.readthedocs.io/en/latest/ref/2d-dwt-and-idwt.html
+    #             https://pywavelets.readthedocs.io/en/latest/
+
+     #Función para calcular la DWT
+    @staticmethod
+    def metodo_encode(imagen):
+        return pywt.dwt2(imagen, 'bior1.3')
+    
+    #Función para calcular la IDWT
+    @staticmethod
+    def metodo_decode(imagen):
+        return pywt.idwt2(imagen, 'bior1.3')
+
+@app.route('/dwt_encoder', methods=['POST'])
+def dwt_encoder():
+    data = request.get_json()
+    try:
+        nombre_input = data['Nombre Input']
+
+        directorio_input = "/shared/" + nombre_input
+        directorio_output = "/shared/DWT/"
+        imagen = (rgb2gray(imread(directorio_input)))
+    
+        imagen_encoded = DWT_Encoder_Class.metodo_encode(imagen)
+        imagen_decoded = DWT_Encoder_Class.metodo_decode(imagen_encoded)
+
+        #Código para mostrar las imagenes
+        plt.figure(figsize=(15, 5))
+        plt.gray()
+        plt.subplot(121), plt.imshow(imagen), plt.axis('off'), plt.title('Imagen original', size=20)
+        plt.subplot(122), plt.imshow(imagen_decoded), plt.axis('off'), plt.title('Imagen reconstruida (DWT+IDWT)', size=20)
+
+        #En lugar de plt.show(), guardamos el grafico
+        plt.savefig(f'{directorio_output}outputDWT.png', bbox_inches='tight')
+        plt.close()
+
+        #Código para mostrar la decomposición 2D (extraido del blog)
+        titles = ['LL - Approximation', 'LH - Horizontal detail','HL - Vertical detail', 'HH - Diagonal detail']
+        LL, (LH, HL, HH) = imagen_encoded
+        fig = plt.figure(figsize=(12, 3))
+        for i, a in enumerate([LL, LH, HL, HH]):
+            ax = fig.add_subplot(1, 4, i + 1)
+            ax.imshow(a, interpolation="nearest", cmap=plt.cm.gray)
+            ax.set_title(titles[i], fontsize=10)
+            ax.set_xticks([])
+            ax.set_yticks([])
+
+        fig.tight_layout()
+        plt.savefig(f'{directorio_output}DWT_decomposición.png', bbox_inches='tight')
+        plt.close()
+        
+        return jsonify({
+            'Msj': f"El resultado se encuenta en el directorio{directorio_output}",
+        })
+    except (ValueError, TypeError) as e:
+        return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
