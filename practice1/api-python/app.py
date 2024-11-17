@@ -414,12 +414,15 @@ def dwt_encoder():
         fig.tight_layout()
         plt.savefig(f'{directorio_output}DWT_decomposición.png', bbox_inches='tight')
         plt.close()
-        
+
         return jsonify({
             'Msj': f"El resultado se encuenta en el directorio{directorio_output}",
         })
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
+
+#Comando PowerShell para probarlo
+#Invoke-WebRequest -Uri http://localhost:5000/dwt_encoder -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Nombre Input": "input.jpg"}' -ContentType "application/json"
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
