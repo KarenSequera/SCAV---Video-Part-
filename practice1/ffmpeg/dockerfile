@@ -1,6 +1,7 @@
 # Contenedor con base UBUNTU
 FROM ubuntu:20.04
 
+
 # Hay que instalar ffmpeg, curl por si necesitamos realizar alguna prueba y actualizar todo 
 RUN apt-get update && apt-get install -y \
     ffmpeg \
