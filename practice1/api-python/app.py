@@ -5,6 +5,7 @@ import pywt
 from skimage.io import imread
 from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
+import unit_test
 
 import subprocess
 
@@ -230,7 +231,7 @@ def run_lenght():
 # Genera una versión en blanco y negro de la imagen en el directorio del output
 def funcion_bw_converter(directorio_input, directorio_output):
     #Construcción de una lista de strings conteniendo el comando
-        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorio_input , "-vf", "format=gray", directorio_output]
+        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg","-y", "-i", directorio_input , "-vf", "format=gray", directorio_output]
         try: 
             subprocess.run(command, check=True)
         except:
@@ -256,7 +257,7 @@ def bw_converter():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
     
-#Comando PowerShell para probarlo, asegurar que el output no existe!
+#Comando PowerShell para probarlo,
 #Invoke-WebRequest -Uri http://localhost:5000/bw_converter -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Nombre Input": "input.jpg", "Nombre Output": "output_bw.jpg"}' -ContentType "application/json"
 
 ##############################################
@@ -269,7 +270,8 @@ def bw_converter():
 # Genera una imagen con las dimensiones deseadas en el directorio introducido
 def funcion_resolution_changer(directorio_input, directorio_output, ancho, alto):
     #Construcción de una lista de strings conteniendo el comando
-        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorio_input , "-vf", f"scale={ancho}:{alto}", directorio_output]
+    # la opcion "y" hace que no pregunte si deseas substituir el directorio que ya existe. 
+        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input , "-vf", f"scale={ancho}:{alto}", directorio_output]
         try: 
             subprocess.run(command, check=True)
         except:
@@ -297,7 +299,7 @@ def resolution_changer():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
     
-#Comando PowerShell para probarlo, asegurar que el output no existe!
+#Comando PowerShell para probarlo
 #Invoke-WebRequest -Uri http://localhost:5000/resolution_changer -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Nombre Input": "input.jpg", "Nombre Output": "output_resolution_changer.jpg", "Alto": 10, "Ancho": 10}' -ContentType "application/json"
 
 ##############################################
@@ -358,7 +360,6 @@ def dct_encoder():
 #Invoke-WebRequest -Uri http://localhost:5000/dct_encoder -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Nombre Input": "input.jpg"}' -ContentType "application/json"
 
 ##############################################
-
 
 class DWT_Encoder_Class:
     #Nuestro encoder usa la implementación de la DWT y la IDWT de la libreria pwt siguiendo un ejemplo de uso de
@@ -423,6 +424,50 @@ def dwt_encoder():
 
 #Comando PowerShell para probarlo
 #Invoke-WebRequest -Uri http://localhost:5000/dwt_encoder -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Nombre Input": "input.jpg"}' -ContentType "application/json"
+
+##############################################
+
+@app.route('/run-tests', methods=['GET'])
+def run_tests_endpoint():
+    results = {}
+
+    # Tests con modulo unittest
+    try:
+        # Ejecutar los unit tests y recoger resultados como strings
+        results['TestColorTranslator'] = unit_test.run_TestColorTranslator()
+        results['TestSerpentine'] = unit_test.run_TestSerpentine()
+        results['TestRunLength'] = unit_test.run_TestRunLength()
+    except Exception as e:
+        results['unit_test_error'] = f"Error while running unit tests: {str(e)}"
+
+    # Tests manuales con imágenes
+    try:
+
+        # Directorio donde se almacenan los resultados
+        resolution_changer_dir = '/shared/unit_tests/resize'
+        bw_converter_dir = '/shared/unit_tests/bw'
+        dct_dir = '/shared/unit_tests/DCT'
+        dwt_dir = '/shared/unit_tests/DWT'
+
+        # Ejecutar los tests de imagen
+        unit_test.ejecutar_tests_resolution_changer()
+        unit_test.ejecutar_tests_bw()
+        unit_test.ejecutar_tests_dct_encoder()
+        unit_test.ejecutar_tests_dwt_encoder()
+
+        # Agregar resultados de los directorios
+        results['ResolutionChanger'] = f"Output files in: {resolution_changer_dir}"
+        results['BWConverter'] = f"Output files in: {bw_converter_dir}"
+        results['DCTEncoder'] = f"Output files in: {dct_dir}"
+        results['DWTEncoder'] = f"Output files in: {dwt_dir}"
+
+    except Exception as e:
+        results['image_test_error'] = f"Error while running image tests: {str(e)}"
+
+    return jsonify(results)
+
+#Comando de powershell para obtener el JSON con los resultados de los unit tests. 
+# Invoke-WebRequest -Uri http://localhost:5000/run-tests -Method GET -Headers @{ "Content-Type" = "application/json" } | Out-File -FilePath .\test_results.txt
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
