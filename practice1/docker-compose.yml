@@ -10,6 +10,7 @@ services:
     command: ["bash", "-c", "tail -f /dev/null"]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # Asegura que ffmpeg también pueda acceder al docker daemon
+      #Acceso a la carpeta compartida
       - ./shared:/shared 
 
   api-python:
@@ -25,6 +26,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # Monta el socket de Docker aquí también
       - ./api-python:/app  # Asegúrate de que los archivos de tu app estén disponibles dentro del contenedor
+      #Acceso a la carpeta compartida
       - ./shared:/shared 
 
     environment:
