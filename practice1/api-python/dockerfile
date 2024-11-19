@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
     gfortran \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalación de dependencias para Docker
+# Instalación de dependencias para poder usar Docker
 RUN apt-get update && apt-get install -y \
     apt-transport-https \
     ca-certificates \

@@ -293,7 +293,7 @@ def resolution_changer():
         funcion_resolution_changer(directorio_input, directorio_output, ancho, alto)
         
         return jsonify({
-            'Msj': f"La imagen en blanco y negro se encuentra en {directorio_output}",
+            'Msj': f"La imagen con resolucion {ancho}x{alto} se encuentra en {directorio_output}",
         })
         
     except (ValueError, TypeError) as e:
@@ -427,7 +427,7 @@ def dwt_encoder():
 
 ##############################################
 
-@app.route('/run-tests', methods=['GET'])
+@app.route('/run_tests', methods=['GET'])
 def run_tests_endpoint():
     results = {}
 
@@ -467,7 +467,7 @@ def run_tests_endpoint():
     return jsonify(results)
 
 #Comando de powershell para obtener el JSON con los resultados de los unit tests. 
-# Invoke-WebRequest -Uri http://localhost:5000/run-tests -Method GET -Headers @{ "Content-Type" = "application/json" } | Out-File -FilePath .\test_results.txt
+# Invoke-WebRequest -Uri http://localhost:5000/run_tests -Method GET -Headers @{ "Content-Type" = "application/json" } | Out-File -FilePath .\test_results.txt
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
