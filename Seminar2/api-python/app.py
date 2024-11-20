@@ -550,7 +550,7 @@ def resolution_changer():
 # -Directorio_output: Directorio relativo del video/imagen producida
 # -Tipo: Tipo de chroma subsampling
 # Genera una imagen con las dimensiones deseadas en el directorio introducido
-def funcion_resolution_changer(directorio_input, directorio_output, tipo_chroma_subsampling):
+def funcion_chroma_subsampling_changer(directorio_input, directorio_output, tipo_chroma_subsampling):
     
     #Construcción de una lista de strings conteniendo el comando
     # la opcion "y" hace que no pregunte si deseas substituir el directorio que ya existe. 
@@ -591,7 +591,7 @@ def chroma_subsampling_changer():
         output_ffmpeg_path = f"../shared/output_chroma_subsampling.mp4"
 
         # Transforma el video al formato deseado 
-        funcion_resolution_changer(input_ffmpeg_path, output_ffmpeg_path, tipo_chroma_subsampling)
+        funcion_chroma_subsampling_changer(input_ffmpeg_path, output_ffmpeg_path, tipo_chroma_subsampling)
 
         # Eliminar el archivo subido después de procesarlo
         os.remove(input_ffmpeg_path)
@@ -602,8 +602,67 @@ def chroma_subsampling_changer():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
 
+#####################
 
 
+#Esta función genera un comando de ffmpeg que dado:
+# -Directorio_input: Directorio relativo del video/imagen
+# -Directorio_output: Directorio relativo del video/imagen producida
+# -Tipo: Tipo de chroma subsampling
+# Genera una imagen con las dimensiones deseadas en el directorio introducido
+def funcion_get_information(directorio_input):
+    
+    #Construcción de una lista de strings conteniendo el comando
+    # la opcion "y" hace que no pregunte si deseas substituir el directorio que ya existe. 
+        
+        command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -i {directorio_input}"]
+        
+        # ffmpeg -i file.mp4 -hide_banner -f null /dev/null
+
+        try: 
+            result = subprocess.run(command, check=True)
+        except:
+            return jsonify({'Error': 'Ese tipo de chroma subsampling no esta disponible'}), 400
+        
+        print(result.stdout)
+
+#Esta función cambia el chroma subsampling del video envíado:
+# -Método: Post
+# -Input:
+#         -Archivo input en la clave 'file' del formulario web
+#         -Tipo de Chroma subsampling en la clave 'data' del formulario web, formato json:
+#               -Type: Por ejemplo: yuv420p, yuv422p, yuv444p, yuv420p10le, yuv422p10le, yuv444p10le
+# - Output: Video con las dimensiones deseadas
+
+@app.route('/video_info', methods=['POST'])
+def video_info():
+    try:
+        
+        #Extraer el archivo de la petición POST
+        if 'file' not in request.files:
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        
+        # Guardar el archivo dentro de la carpeta shared para que ffmpeg pueda acceder a el
+        input_ffmpeg_path = f"../shared/{file.filename}"
+        file.save(input_ffmpeg_path)
+
+        # Directorio del output
+        output_ffmpeg_path = f"../shared/output_chroma_subsampling.mp4"
+
+        # Transforma el video al formato deseado 
+        funcion_get_information(input_ffmpeg_path)
+
+        # Eliminar el archivo subido después de procesarlo
+        os.remove(input_ffmpeg_path)
+
+        #Se devuelve el archivo que ha producido ffmpeg
+        return send_file(output_ffmpeg_path, mimetype='video/mp4', as_attachment=True, download_name=f"video_chroma_subsampled.mp4")
+
+    except (ValueError, TypeError) as e:
+        return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
