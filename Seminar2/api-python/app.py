@@ -614,13 +614,13 @@ def funcion_get_information(directorio_input):
     
     #Construcción de una lista de strings conteniendo el comando
     # la opcion "y" hace que no pregunte si deseas substituir el directorio que ya existe. 
-        
-        command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -i {directorio_input}"]
-        
-        # ffmpeg -i file.mp4 -hide_banner -f null /dev/null
+
+        output_file = f"../shared/output.txt" #ruta del archivo en donde se escribiran los datos 
+
+        command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -v quiet -print_format json -show_format  {directorio_input} | grep -E 'major_brand|minor_version|compatible_brands|encoder|comment' > {output_file} 2>&1"]
 
         try: 
-            result = subprocess.run(command, check=True)
+            result = subprocess.run(command, check=True, capture_output=True, text=True)
         except:
             return jsonify({'Error': 'Ese tipo de chroma subsampling no esta disponible'}), 400
         
