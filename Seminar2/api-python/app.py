@@ -615,14 +615,15 @@ def funcion_get_information(directorio_input):
     #Construcción de una lista de strings conteniendo el comando
     # la opcion "y" hace que no pregunte si deseas substituir el directorio que ya existe. 
 
-        output_file = f"../shared/output.txt" #ruta del archivo en donde se escribiran los datos 
+        output_file = "../shared/output_information.json" 
 
-        command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -v quiet -print_format json -show_format  {directorio_input} | grep -E 'major_brand|minor_version|compatible_brands|encoder|comment' > {output_file} 2>&1"]
+        command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -v quiet -print_format json -show_format  {directorio_input} | grep -E 'format_name|duration|size|bit_rate|encoder'  | sed '1s/^/{{ /; $s/,$/ }}/' | tr -d '\\n' | sed 's/, /,/g'> {output_file} 2>&1"]
+        #command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -v quiet -print_format json -show_format  {directorio_input} > {output_file} 2>&1"]
 
         try: 
             result = subprocess.run(command, check=True, capture_output=True, text=True)
         except:
-            return jsonify({'Error': 'Ese tipo de chroma subsampling no esta disponible'}), 400
+            return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
         
         print(result.stdout)
 
@@ -650,16 +651,10 @@ def video_info():
         file.save(input_ffmpeg_path)
 
         # Directorio del output
-        output_ffmpeg_path = f"../shared/output_chroma_subsampling.mp4"
-
-        # Transforma el video al formato deseado 
-        funcion_get_information(input_ffmpeg_path)
-
-        # Eliminar el archivo subido después de procesarlo
-        os.remove(input_ffmpeg_path)
+        output_path = f"../shared/output_information.json"
 
         #Se devuelve el archivo que ha producido ffmpeg
-        return send_file(output_ffmpeg_path, mimetype='video/mp4', as_attachment=True, download_name=f"video_chroma_subsampled.mp4")
+        return send_file(output_path, mimetype='json', as_attachment=False)
 
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
