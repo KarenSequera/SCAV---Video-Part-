@@ -38,7 +38,7 @@ A continuación incluimos un ejemplo de petición (en PowerShell) para cada uno 
 ### **/rgb_to_yuv POST** 
 
 Dados los valores RGB, este endpoint devuelve su equivalente en sistema YUV. Ejemplo:
-Petición:
+
 
     $ Invoke-WebRequest -Uri http://localhost:5000/rgb_to_yuv -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"R":255,"G":100,"B":50}' -ContentType "application/json"
     Output: 
@@ -68,7 +68,7 @@ Petición:
 ### **/yuv_to_rgb POST**
 
 Dados los valores YUV, este EndPoint devuelve su equivalente en sistema RGB. Ejemplo:
-Petición:
+
 
 
     $ Invoke-WebRequest -Uri http://localhost:5000/yuv_to_rgb -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Y":128,"U":128,"V":128}' -ContentType "application/json"
@@ -102,7 +102,7 @@ Petición:
 ### **/serpentine POST**
 
 Dada una matriz, este endpoint devuelve una lista con el resultado de leerla de forma “serpentine” (siguiendo la manera de leer de las slides de clase). Ejemplo:
-Petición:
+
 
     $ Invoke-WebRequest -Uri http://localhost:5000/serpentine -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Matriz":[[1,2,6,7,14],[3,5,8,13,15],[4,9,12,16,19],[10,11,17,18,20]]}' -ContentType "application/json"
     
@@ -132,7 +132,7 @@ Petición:
 ### **/run_lenght POST** 
 
 Dada una lista conteniendo un stream de datos, este Endpoint devuelve una lista con el resultado de aplicar el algoritmo “run lenght”. Ejemplo:
-Petición:
+
 
     $ Invoke-WebRequest -Uri http://localhost:5000/run_lenght -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Data_stream":[0, 0, 3, 4, 8, 6, 33, 0, 0, 0, 4]}' -ContentType "application/json" 
     
@@ -163,7 +163,7 @@ Petición:
 ### **/bw_converter POST**
 
 Dada el nombre de una imagen de input (tiene que estar guardada dentro de la carpeta /share/) y el nombre para la imagen de output, este endpoint llama al container ffmpeg para que genere una versión en blanco y negro del input. Devuelve el directorio dónde se encuentra el output. Ejemplo:
-Petición:
+
 
     $ Invoke-WebRequest -Uri http://localhost:5000/bw_converter -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Nombre Input": "input.jpg", "Nombre Output": "output_bw.jpg"}' -ContentType "application/json"
     
@@ -195,7 +195,7 @@ Petición:
 ### **/resolution_changer POST** 
 
 Dada el nombre de una imagen de input (tiene que estar guardada dentro de la carpeta /share/), el nombre para la imagen de output, y las dimensiones (píxeles de ancho y de alto), este Endpoint llama al container ffmpeg para que genere una versión en la resolución indicada. Devuelve el directorio dónde se encuentra el output. Ejemplo:
-Petición:
+
 
     $ Invoke-WebRequest -Uri http://localhost:5000/resolution_changer -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Nombre Input": "input.jpg", "Nombre Output": "output_resolution_changer.jpg", "Alto": 10, "Ancho": 10}' -ContentType "application/json"
     Nota: La imagen output se encuentra en el directorio /shared/. Las funciones tienen como output alguna imagen, siempre devuelven un mensaje con el directorio.
@@ -228,7 +228,7 @@ Petición:
 ### **/dct_encoder POST** 
 
 Dada el nombre de una imagen de input (tiene que estar guardada dentro de la carpeta /share/), este endpoint codifica la imagen usando la dct y la descodifica. Después, genera una imagen que contiene la original, una visualización de la DCT y la reconstruida. Devuelve el directorio dónde se encuentra la imagen generada. Ejemplo:
-Petición:
+
 
     $ Invoke-WebRequest -Uri http://localhost:5000/dct_encoder -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Nombre Input": "input.jpg"}' -ContentType "application/json"
     
@@ -260,7 +260,7 @@ Petición:
 ### **/dwt_encoder POST** 
 
 Dada el nombre de una imagen de input (tiene que estar guardada dentro de la carpeta /share/), este endpoint codifica la imagen usando la dwt y la descodifica. Después, genera una imagen que contiene la original y la reconstruida para poder compararlas. Además, también genera una imagen que contiene la descomposición en LL, LH, HL y HH de la DWT. Devuelve el directorio dónde se encuentran las imágenes generadas. Ejemplo:
-Petición:
+
 
     $ Invoke-WebRequest -Uri http://localhost:5000/dwt_encoder -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Nombre Input": "input.jpg"}' -ContentType "application/json"
         
