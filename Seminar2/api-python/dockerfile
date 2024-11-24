@@ -1,4 +1,3 @@
-
 FROM ubuntu:20.04
 
 #Para que tenga permisos para ejecutar Docker
@@ -43,7 +42,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia el resto del código de la aplicación
 COPY . /app/
 
+# Exponer ambos puertos
+EXPOSE 5000
+EXPOSE 5001
+
 # Define el comando por defecto para ejecutar la aplicación
-CMD ["python3", "app.py"]
-
-
+CMD ["sh", "-c", "python3 app/app_lab1.py & python3 app/app_seminar2.py"]
