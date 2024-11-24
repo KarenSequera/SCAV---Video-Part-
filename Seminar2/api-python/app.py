@@ -474,6 +474,13 @@ def run_tests_endpoint():
 #Comando de powershell para obtener el JSON con los resultados de los unit tests. 
 # Invoke-WebRequest -Uri http://localhost:5000/run_tests -Method GET -Headers @{ "Content-Type" = "application/json" } | Out-File -FilePath .\test_results.txt
 
+
+###############################################################################
+
+##################### SEMINARIO 2
+
+#################### Otros
+
 #Endpoint para poder subir archivos a la API
 # - Método: Post
 # - Input: Archivo en la clave 'file' del formulario web
@@ -498,8 +505,26 @@ def upload_video():
     
     return jsonify({"message": f"File {file.filename} uploaded successfully!"}), 200
 
-###############################################################################
-##################### LAB 1
+
+#Esta función limpia el directorio shared de contenidos 
+def delete_share_contents():
+    directorio = "../shared"
+    #Iterar por los archivos del directorio
+    for archivo in os.listdir(directorio):
+        #Obtiene el directorio completo y los elimina
+        ruta_completa = os.path.join(directorio, archivo)
+        os.remove(ruta_completa) 
+
+#Esta función limpia el directorio shared de contenidos 
+def delete_uploads_contents():
+    directorio = "../uploads"
+    #Iterar por los archivos del directorio
+    for archivo in os.listdir(directorio):
+        #Obtiene el directorio completo y los elimina
+        ruta_completa = os.path.join(directorio, archivo)
+        os.remove(ruta_completa) 
+
+##################### 1)
 
 #Esta función cambia la resolución del video envíado:
 # -Método: Post
@@ -512,6 +537,7 @@ def upload_video():
 
 @app.route('/resolution_changer', methods=['POST'])
 def resolution_changer():
+    delete_share_contents()
     data = json.loads(request.form.get('data'))
     try:
         #Extraer la resolución a la que se desea convertir el video
@@ -543,34 +569,35 @@ def resolution_changer():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
 
-#####################
+##################### 2)
 
 #Esta función genera un comando de ffmpeg que dado:
-# -Directorio_input: Directorio relativo del video/imagen
-# -Directorio_output: Directorio relativo del video/imagen producida
-# -Tipo: Tipo de chroma subsampling
+# -Directorio_input: Directorio relativo del video
+# -Directorio_output: Directorio relativo del video producida
+# -Tipo: Tipo de chroma subsampling, ej. yuv420p
 # Genera una imagen con las dimensiones deseadas en el directorio introducido
 def funcion_chroma_subsampling_changer(directorio_input, directorio_output, tipo_chroma_subsampling):
     
     #Construcción de una lista de strings conteniendo el comando
     # la opcion "y" hace que no pregunte si deseas substituir el directorio que ya existe. 
-        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input , "-c:v", "libx265",  "-vf", f"format={tipo_chroma_subsampling}", directorio_output]
+    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input , "-c:v", "libx265",  "-vf", f"format={tipo_chroma_subsampling}", directorio_output]
 
-        try: 
-            subprocess.run(command, check=True)
-        except:
-            return jsonify({'Error': 'Ese tipo de chroma subsampling no esta disponible'}), 400
+    try: 
+        subprocess.run(command, check=True)
+    except:
+         return jsonify({'Error': 'Ese tipo de chroma subsampling no esta disponible'}), 400
 
 #Esta función cambia el chroma subsampling del video envíado:
 # -Método: Post
 # -Input:
 #         -Archivo input en la clave 'file' del formulario web
-#         -Tipo de Chroma subsampling en la clave 'data' del formulario web, formato json:
+#         -Tipo de Chroma subsampling en la clave 'data' del formulario web, formato json: {"Type":"yuv420p"}
 #               -Type: Por ejemplo: yuv420p, yuv422p, yuv444p, yuv420p10le, yuv422p10le, yuv444p10le
 # - Output: Video con las dimensiones deseadas
 
 @app.route('/chroma_subsampling_changer', methods=['POST'])
 def chroma_subsampling_changer():
+    delete_share_contents()
     data = json.loads(request.form.get('data'))
     try:
         #Extraer la resolución a la que se desea convertir el video
@@ -593,52 +620,48 @@ def chroma_subsampling_changer():
         # Transforma el video al formato deseado 
         funcion_chroma_subsampling_changer(input_ffmpeg_path, output_ffmpeg_path, tipo_chroma_subsampling)
 
-        # Eliminar el archivo subido después de procesarlo
-        os.remove(input_ffmpeg_path)
-
         #Se devuelve el archivo que ha producido ffmpeg
         return send_file(output_ffmpeg_path, mimetype='video/mp4', as_attachment=True, download_name=f"video_chroma_subsampled.mp4")
 
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
 
-#####################
-
+##################### 3)
 
 #Esta función genera un comando de ffmpeg que dado:
-# -Directorio_input: Directorio relativo del video/imagen
-# -Directorio_output: Directorio relativo del video/imagen producida
-# -Tipo: Tipo de chroma subsampling
-# Genera una imagen con las dimensiones deseadas en el directorio introducido
+# -Directorio_input: Directorio relativo del video
+# Genera una un json con 5 datos relevantes del video extraidos del comando ffprobe
+
 def funcion_get_information(directorio_input):
+    output_file = "../shared/output_information.json" 
     
-    #Construcción de una lista de strings conteniendo el comando
-    # la opcion "y" hace que no pregunte si deseas substituir el directorio que ya existe. 
-
-        output_file = "../shared/output_information.json" 
-
-        command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -v quiet -print_format json -show_format  {directorio_input} | grep -E 'format_name|duration|size|bit_rate|encoder'  | sed '1s/^/{{ /; $s/,$/ }}/' | tr -d '\\n' | sed 's/, /,/g'> {output_file} 2>&1"]
-        #command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -v quiet -print_format json -show_format  {directorio_input} > {output_file} 2>&1"]
-
-        try: 
-            subprocess.run(command, check=True, capture_output=True, text=True)
-        except:
-            return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
+    #Para obtener los 5 datos relevantes del video se formatea el output del comando ffprobe para convertirlo en un json
+    # (https://ffmpeg.org/ffprobe.html)
+    # grep -E 'format_name|duration|size|bit_rate|encoder' : filtramos por las lineas que contengan esas palabras. 
+    # sed '1s/^/{{ /; $s/,$/ }}/' : introduce todo el contenido entre {}
+    # tr -d '\\n' : elimina los santos de linea
+    # sed 's/, /,/g' elima los espacios despues de las comas
+    # Por último se redirige el output formateado a un archivo json
+    command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -v quiet -print_format json -show_format  {directorio_input} | grep -E 'format_name|duration|size|bit_rate|encoder'  | sed '1s/^/{{ /; $s/,$/ }}/' | tr -d '\\n' | sed 's/, /,/g'> {output_file} 2>&1"]
+        
+    try: 
+        subprocess.run(command, check=True, capture_output=True, text=True)
+    except:
+        return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
         
         
 
-#Esta función cambia el chroma subsampling del video envíado:
+#Este endpoint devuelve un json con 5 caracteristicas del video introducido:
 # -Método: Post
 # -Input:
 #         -Archivo input en la clave 'file' del formulario web
-#         -Tipo de Chroma subsampling en la clave 'data' del formulario web, formato json:
-#               -Type: Por ejemplo: yuv420p, yuv422p, yuv444p, yuv420p10le, yuv422p10le, yuv444p10le
-# - Output: Video con las dimensiones deseadas
+# -Output: Json con los datos: format_name, duration, size, bit_rate y encoder
 
 @app.route('/video_info', methods=['POST'])
+
 def video_info():
+    delete_share_contents()
     try:
-        
         #Extraer el archivo de la petición POST
         if 'file' not in request.files:
             return jsonify({"error": "La petición no tiene ningún archivo"}), 400
@@ -649,9 +672,11 @@ def video_info():
         # Guardar el archivo dentro de la carpeta shared para que ffmpeg pueda acceder a el
         input_ffmpeg_path = f"../shared/{file.filename}"
         file.save(input_ffmpeg_path)
+        funcion_get_information(input_ffmpeg_path)
 
         # Directorio del output
         output_path = f"../shared/output_information.json"
+        
 
         #Se devuelve el archivo que ha producido ffmpeg
         return send_file(output_path, mimetype='json', as_attachment=False)
@@ -659,7 +684,11 @@ def video_info():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
     
-######################################
+##################### 4)
+
+#Esta función genera un comando de ffmpeg que dado:
+# -Directorio_input: Directorio relativo del video
+# Genera un video con solo los primeros 20 segundos, se genera en el directorio compartido de los contenedores. 
 
 def video_cut(directorio_input):
 
@@ -669,7 +698,12 @@ def video_cut(directorio_input):
     try: 
         subprocess.run(command, check=True, capture_output=True, text=True)
     except:
-        return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
+        return jsonify({'Error': 'Error al generar video de 20s'}), 400
+    
+    
+#Esta función genera un comando de ffmpeg que dado:
+# -Directorio_input: Directorio relativo del video
+#Genera una pista de audio aac de solo un canal, se genera en el directorio compartido de los contenedores. 
     
 def mp4_to_AAC_mono_track(directorio_input):
 
@@ -679,8 +713,14 @@ def mp4_to_AAC_mono_track(directorio_input):
     try: 
         subprocess.run(command, check=True, capture_output=True, text=True)
     except:
-        return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
+        return jsonify({'Error': 'Error al generar la pista aac'}), 400
     
+    
+#Esta función genera un comando de ffmpeg que dado:
+# -Directorio_input: Directorio relativo del video
+# -Bitrate: Bitrate de la nueva pista
+#Genera una pista de audio mp3 estereo con el bitrate espeficicado, se genera en el directorio compartido de los contenedores.
+
 def mp4_to_mp3_stereo_lower_bitrate(directorio_input, bitrate):
 
     directorio_output_video = "../shared/mp4_to_mp3_stereo.mp3"
@@ -688,7 +728,12 @@ def mp4_to_mp3_stereo_lower_bitrate(directorio_input, bitrate):
     try: 
         subprocess.run(command, check=True, capture_output=True, text=True)
     except:
-        return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
+        return jsonify({'Error': 'Error al generar la pista mp3'}), 400
+    
+    
+#Esta función genera un comando de ffmpeg que dado:
+# -Directorio_input: Directorio relativo del video
+#Genera una pista de audio con el codec ac3, se genera en el directorio compartido de los contenedores.
 
 def mp4_to_ac3(directorio_input):
     directorio_output_video = "../shared/mp4_to_ac3.ac3"
@@ -697,7 +742,12 @@ def mp4_to_ac3(directorio_input):
     try: 
         subprocess.run(command, check=True, capture_output=True, text=True)
     except:
-        return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
+        return jsonify({'Error': 'Error al generar la pista ac3'}), 400
+    
+    
+#Esta función genera un comando de ffmpeg que dado:
+# -Directorio_input: Directorio relativo del video
+#Genera una pista de audio con el codec ac3, se genera en el directorio compartido de los contenedores.
     
 def package(video20s_path, aac_mono_track_path, mp4_to_mp3_stereo_lower_bitrate_path, mp4_to_ac3_path):
     directorio_output_video = "../shared/BBC20s_package.mp4"
@@ -707,12 +757,23 @@ def package(video20s_path, aac_mono_track_path, mp4_to_mp3_stereo_lower_bitrate_
     try: 
         subprocess.run(command, check=True, capture_output=True, text=True)
     except:
-        return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
+        return jsonify({'Error': 'Error al generar el contenedor mp4'}), 400
+    
+
+# Este endpoint genera un contenedor mp4 que contiene una version de 20 segundos del video subido y el audio en tres formatos diferentes: aac mono,
+# mp3 estereo con el bitrate especificado, aac3.  
+# -Método: Post
+# -Input:
+#         -Archivo input en la clave 'file' del formulario web
+#         -Bitrate deseado para la pista mp3 estereo en la clave 'data', formato json: {"Bitrate":"32k"}
+# -Output: Json con los datos: format_name, duration, size, bit_rate y encoder
 
 @app.route('/video_container_creator', methods=['POST'])
 def video_container_creator():
+    delete_share_contents()
+    data = json.loads(request.form.get('data'))
     try:
-        
+       
         #Extraer el archivo de la petición POST
         if 'file' not in request.files:
             return jsonify({"error": "La petición no tiene ningún archivo"}), 400
@@ -728,16 +789,21 @@ def video_container_creator():
         video_cut(input_ffmpeg_path)
         video20s_path = "../shared/output_20s.mp4"
      
+        #Segunda parte del ejercicio, generar una pista AAC mono
         mp4_to_AAC_mono_track(video20s_path)
         aac_mono_track_path = "../shared/aac_mono_track.aac"
-
-        #TODO: cambiar bitrate a que lo reciba en el post.
-        mp4_to_mp3_stereo_lower_bitrate(video20s_path, "32k")
+        
+        #Tercera parte del ejercicio, generar una pista mp3 stereo con el bitrate deseado
+        #Extraer del input el bitrate
+        bitrate = data['Bitrate']
+        mp4_to_mp3_stereo_lower_bitrate(video20s_path, bitrate)
         mp4_to_mp3_stereo_lower_bitrate_path = "../shared/mp4_to_mp3_stereo.mp3"
 
+        #Cuarta parte del ejercicio, generar una pista ac3
         mp4_to_ac3(video20s_path)
         mp4_to_ac3_path = "../shared/mp4_to_ac3.ac3"
 
+        #Última parte, introducirlo todo en un contenedor mp4
         package(video20s_path, aac_mono_track_path, mp4_to_mp3_stereo_lower_bitrate_path, mp4_to_ac3_path)
         video_final_path = "../shared/BBC20s_package.mp4"
 
