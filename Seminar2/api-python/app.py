@@ -625,7 +625,7 @@ def funcion_get_information(directorio_input):
         except:
             return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
         
-        print(result.stdout)
+        
 
 #Esta función cambia el chroma subsampling del video envíado:
 # -Método: Post
@@ -658,6 +658,44 @@ def video_info():
 
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
+    
+######################################
+
+def video_cut(directorio_input):
+
+    output_video = "../shared/output_20s.mp4"
+    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-ss", "00:00:00", "-i", directorio_input,  "-c", "copy", "-t",  "00:00:20", output_video]
+
+    try: 
+        result = subprocess.run(command, check=True, capture_output=True, text=True)
+        print(result.stdout)
+    except:
+        return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
+        
+
+@app.route('/video_container_creator', methods=['POST'])
+def video_container_creator():
+    try:
+        
+        #Extraer el archivo de la petición POST
+        if 'file' not in request.files:
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        
+        # Guardar el archivo dentro de la carpeta shared para que ffmpeg pueda acceder a el
+        input_ffmpeg_path = f"../shared/{file.filename}"
+        file.save(input_ffmpeg_path)
+        video_cut(input_ffmpeg_path)
+        # Directorio del output
+        output_ffmpeg_path = "../shared/output_20s.mp4"
+        #Se devuelve el archivo que ha producido ffmpeg
+        return send_file(output_ffmpeg_path, mimetype='video/mp4', as_attachment=True, download_name=f"output_20s.mp4")
+
+    except (ValueError, TypeError) as e:
+        return jsonify({'error': str(e)}), 400
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
