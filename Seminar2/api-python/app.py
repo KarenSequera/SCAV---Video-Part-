@@ -621,7 +621,7 @@ def funcion_get_information(directorio_input):
         #command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -v quiet -print_format json -show_format  {directorio_input} > {output_file} 2>&1"]
 
         try: 
-            result = subprocess.run(command, check=True, capture_output=True, text=True)
+            subprocess.run(command, check=True, capture_output=True, text=True)
         except:
             return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
         
@@ -663,15 +663,51 @@ def video_info():
 
 def video_cut(directorio_input):
 
-    output_video = "../shared/output_20s.mp4"
-    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-ss", "00:00:00", "-i", directorio_input,  "-c", "copy", "-t",  "00:00:20", output_video]
-
+    directorio_output_video = "../shared/output_20s.mp4"
+    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-ss", "00:00:00", "-i", directorio_input,  "-c", "copy", "-t",  "00:00:20", directorio_output_video]
+    
     try: 
-        result = subprocess.run(command, check=True, capture_output=True, text=True)
-        print(result.stdout)
+        subprocess.run(command, check=True, capture_output=True, text=True)
     except:
         return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
-        
+    
+def mp4_to_AAC_mono_track(directorio_input):
+
+    directorio_output_video = "../shared/aac_mono_track.aac"
+    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorio_input, "-acodec", "aac", "-ac", "1", directorio_output_video]
+
+    try: 
+        subprocess.run(command, check=True, capture_output=True, text=True)
+    except:
+        return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
+    
+def mp4_to_mp3_stereo_lower_bitrate(directorio_input, bitrate):
+
+    directorio_output_video = "../shared/mp4_to_mp3_stereo.mp3"
+    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorio_input, "-acodec", "mp3", "-ac", "2", "-b:a", bitrate, directorio_output_video]
+    try: 
+        subprocess.run(command, check=True, capture_output=True, text=True)
+    except:
+        return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
+
+def mp4_to_ac3(directorio_input):
+    directorio_output_video = "../shared/mp4_to_ac3.ac3"
+    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorio_input, "-acodec", "ac3", directorio_output_video]
+
+    try: 
+        subprocess.run(command, check=True, capture_output=True, text=True)
+    except:
+        return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
+    
+def package(video20s_path, aac_mono_track_path, mp4_to_mp3_stereo_lower_bitrate_path, mp4_to_ac3_path):
+    directorio_output_video = "../shared/BBC20s_package.mp4"
+    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", video20s_path, "-i", aac_mono_track_path, 
+               "-i", mp4_to_mp3_stereo_lower_bitrate_path, "-i", mp4_to_ac3_path, "-map", "0:v", "-map", "1:a", "-map", "2:a", "-map", "3:a", "-c:v", 
+               "copy", "-c:a",  "copy", directorio_output_video]
+    try: 
+        subprocess.run(command, check=True, capture_output=True, text=True)
+    except:
+        return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
 
 @app.route('/video_container_creator', methods=['POST'])
 def video_container_creator():
@@ -687,11 +723,26 @@ def video_container_creator():
         # Guardar el archivo dentro de la carpeta shared para que ffmpeg pueda acceder a el
         input_ffmpeg_path = f"../shared/{file.filename}"
         file.save(input_ffmpeg_path)
+
+        #Primera parte del ejercicio, cortar el video a 20s
         video_cut(input_ffmpeg_path)
-        # Directorio del output
-        output_ffmpeg_path = "../shared/output_20s.mp4"
+        video20s_path = "../shared/output_20s.mp4"
+     
+        mp4_to_AAC_mono_track(video20s_path)
+        aac_mono_track_path = "../shared/aac_mono_track.aac"
+
+        #TODO: cambiar bitrate a que lo reciba en el post.
+        mp4_to_mp3_stereo_lower_bitrate(video20s_path, "32k")
+        mp4_to_mp3_stereo_lower_bitrate_path = "../shared/mp4_to_mp3_stereo.mp3"
+
+        mp4_to_ac3(video20s_path)
+        mp4_to_ac3_path = "../shared/mp4_to_ac3.ac3"
+
+        package(video20s_path, aac_mono_track_path, mp4_to_mp3_stereo_lower_bitrate_path, mp4_to_ac3_path)
+        video_final_path = "../shared/BBC20s_package.mp4"
+
         #Se devuelve el archivo que ha producido ffmpeg
-        return send_file(output_ffmpeg_path, mimetype='video/mp4', as_attachment=True, download_name=f"output_20s.mp4")
+        return send_file(video_final_path, mimetype='video/mp4', as_attachment=True, download_name=f"BBC20s_package.mp4")
 
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
