@@ -10,7 +10,9 @@ app_seminar2 = Flask(__name__)
 
 ##################### SEMINARIO 2
 
-#################### Otros
+######## NOTA: LOS ENDPOINTS DE ESTE SEMINARIO SE ENCUENTRAN EN EL PUERTO 5001!!!!!!!!!!!
+
+#################### Otros endpoints/funciones útiles
 
 #Endpoint para poder subir archivos a la API
 # - Método: Post
@@ -46,6 +48,7 @@ def delete_share_contents():
         ruta_completa = os.path.join(directorio, archivo)
         os.remove(ruta_completa) 
 
+
 #Esta función limpia el directorio shared de contenidos 
 def delete_uploads_contents():
     directorio = "../uploads"
@@ -54,6 +57,7 @@ def delete_uploads_contents():
         #Obtiene el directorio completo y los elimina
         ruta_completa = os.path.join(directorio, archivo)
         os.remove(ruta_completa) 
+
 
 ##################### 1)
 
@@ -100,11 +104,19 @@ def resolution_changer():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
 
+
+#### Ejemplo de petición, curl (cambiar localización del archivo) para la CMD de Windows: 
+# curl --location "http://localhost:5001/resolution_changer" ^
+# --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+# --form "data={\"Alto\":\"100\",\"Ancho\":100}" ^
+# --output output_file.mp4
+
+
 ##################### 2)
 
 #Esta función genera un comando de ffmpeg que dado:
 # -Directorio_input: Directorio relativo del video
-# -Directorio_output: Directorio relativo del video producida
+# -Directorio_output: Directorio relativo del video producido
 # -Tipo: Tipo de chroma subsampling, ej. yuv420p
 # Genera una imagen con las dimensiones deseadas en el directorio introducido
 def funcion_chroma_subsampling_changer(directorio_input, directorio_output, tipo_chroma_subsampling):
@@ -117,6 +129,7 @@ def funcion_chroma_subsampling_changer(directorio_input, directorio_output, tipo
         subprocess.run(command, check=True)
     except:
          return jsonify({'Error': 'Ese tipo de chroma subsampling no esta disponible'}), 400
+
 
 #Esta función cambia el chroma subsampling del video envíado:
 # -Método: Post
@@ -131,7 +144,7 @@ def chroma_subsampling_changer():
     delete_share_contents()
     data = json.loads(request.form.get('data'))
     try:
-        #Extraer la resolución a la que se desea convertir el video
+        #Extraer el chroma subsampling al que se desea convertir el video
         tipo_chroma_subsampling = data['Type']
         
         #Extraer el archivo de la petición POST
@@ -150,12 +163,20 @@ def chroma_subsampling_changer():
 
         # Transforma el video al formato deseado 
         funcion_chroma_subsampling_changer(input_ffmpeg_path, output_ffmpeg_path, tipo_chroma_subsampling)
+
+        #Adapta al directorio de la aplicación de python
         output_ffmpeg_path = "../../shared_seminar2/output_chroma_subsampling.mp4"
         #Se devuelve el archivo que ha producido ffmpeg
         return send_file(output_ffmpeg_path, mimetype='video/mp4', as_attachment=True, download_name=f"video_chroma_subsampled.mp4")
 
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
+
+#### Ejemplo de petición, curl (cambiar localización del archivo) para la CMD de Windows: 
+#curl --location "http://localhost:5001/chroma_subsampling_changer" ^
+#--form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+#--form "data={\"Type\":\"yuv420p\"}" ^
+#--output output_file.mp4
 
 ##################### 3)
 
@@ -170,7 +191,7 @@ def funcion_get_information(directorio_input):
     # (https://ffmpeg.org/ffprobe.html)
     # grep -E 'format_name|duration|size|bit_rate|encoder' : filtramos por las lineas que contengan esas palabras. 
     # sed '1s/^/{{ /; $s/,$/ }}/' : introduce todo el contenido entre {}
-    # tr -d '\\n' : elimina los santos de linea
+    # tr -d '\\n' : elimina los saltos de linea
     # sed 's/, /,/g' elima los espacios despues de las comas
     # Por último se redirige el output formateado a un archivo json
     command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -v quiet -print_format json -show_format  {directorio_input} | grep -E 'format_name|duration|size|bit_rate|encoder'  | sed '1s/^/{{ /; $s/,$/ }}/' | tr -d '\\n' | sed 's/, /,/g'> {output_file} 2>&1"]
@@ -208,12 +229,18 @@ def video_info():
         # Directorio del output
         output_path = f"../../shared_seminar2/output_information.json"
         
-
-        #Se devuelve el archivo que ha producido ffmpeg
+        #Se devuelve el json con los datos del video
         return send_file(output_path, mimetype='json', as_attachment=False)
 
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
+
+
+#### Ejemplo de petición, curl (cambiar localización del archivo) para la CMD de Windows: 
+#curl --location "http://localhost:5001/video_info" ^
+#--form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+#--output output_file.json
+
     
 ##################### 4)
 
@@ -225,7 +252,6 @@ def video_cut(directorio_input):
 
     directorio_output_video = "../shared_seminar2/output_20s.mp4"
     command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-ss", "00:00:00", "-i", directorio_input,  "-c", "copy", "-t",  "00:00:20", directorio_output_video]
-    
     try: 
         subprocess.run(command, check=True, capture_output=True, text=True)
     except:
@@ -240,7 +266,6 @@ def mp4_to_AAC_mono_track(directorio_input):
 
     directorio_output_video = "../shared_seminar2/aac_mono_track.aac"
     command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorio_input, "-acodec", "aac", "-ac", "1", directorio_output_video]
-
     try: 
         subprocess.run(command, check=True, capture_output=True, text=True)
     except:
@@ -267,9 +292,9 @@ def mp4_to_mp3_stereo_lower_bitrate(directorio_input, bitrate):
 #Genera una pista de audio con el codec ac3, se genera en el directorio compartido de los contenedores.
 
 def mp4_to_ac3(directorio_input):
+
     directorio_output_video = "../shared_seminar2/mp4_to_ac3.ac3"
     command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorio_input, "-acodec", "ac3", directorio_output_video]
-
     try: 
         subprocess.run(command, check=True, capture_output=True, text=True)
     except:
@@ -297,7 +322,7 @@ def package(video20s_path, aac_mono_track_path, mp4_to_mp3_stereo_lower_bitrate_
 # -Input:
 #         -Archivo input en la clave 'file' del formulario web
 #         -Bitrate deseado para la pista mp3 estereo en la clave 'data', formato json: {"Bitrate":"32k"}
-# -Output: Json con los datos: format_name, duration, size, bit_rate y encoder
+# -Output: Archivo mp4 con el audio en los tres formatos deseados. 
 
 @app_seminar2.route('/video_container_creator', methods=['POST'])
 def video_container_creator():
@@ -344,32 +369,44 @@ def video_container_creator():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
     
+
+#### Ejemplo de petición, curl (cambiar localización del archivo) para la CMD de Windows: 
+#curl --location "http://localhost:5001/video_container_creator" ^
+#--form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+#--form "data={\"Bitrate\":\"32k\"}" ^
+#--output output_file.mp4
+    
 ##################### 5)
 
 #Esta función genera un comando de ffmpeg que dado:
 # -Directorio_input: Directorio relativo del video
-# Genera una un json con 5 datos relevantes del video extraidos del comando ffprobe
+# Genera una un txt con la información de las pistas de audio, cada linea representa una pista de audio
 
 def get_number_of_tracks(directorio_input):
     output_file = "../shared_seminar2/number_of_tracks.txt" 
-    
-    command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -i  {directorio_input} 2>&1 | grep -E 'Stream' | grep -E 'Audio' > {output_file} "]
 
+    # Usamos el mismo comando ffprobe que para el ejercicio de los 5 datos del video
+    # grep -E 'Stream' | grep -E 'Audio': Esta vez, filtramos por las filas que contienen la palabra "Stream" y despues las que contienen la palabra "Audio"
+    command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -i  {directorio_input} 2>&1 | grep -E 'Stream' | grep -E 'Audio' > {output_file} "]
     try: 
         subprocess.run(command, check=True, capture_output=True, text=True)
     except:
         return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
-        
+
+
+#Esta función cuenta las lindeas dentro del archivo txt especificado:
+# -Directorio_input: Directorio relativo del video
+# Genera una un txt con la información de las pistas de audio, cada linea representa una pista de audio 
 def count_lines_txt(directorio_input):
-    fichero = open("../shared_seminar2/number_of_tracks.txt")
+    #fichero = open("../shared_seminar2/number_of_tracks.txt")
+    fichero = open(directorio_input)
     return len(fichero.readlines())
 
-#Este endpoint devuelve un json con 5 caracteristicas del video introducido:
+#Este endpoint devuelve un json con el número de audio tracks del archivo input
 # -Método: Post
 # -Input:
 #         -Archivo input en la clave 'file' del formulario web
-# -Output: Json con los datos: format_name, duration, size, bit_rate y encoder
-
+# -Output: Json con el número de tracks
 @app_seminar2.route('/get_numer_of_tracks', methods=['POST'])
 
 def get_numer_of_tracks():
@@ -386,8 +423,10 @@ def get_numer_of_tracks():
         input_ffmpeg_path = f"../shared_seminar2/{file.filename}"
         file.save(input_ffmpeg_path)
 
+        # Obtener un .txt con la información de las tracks
         get_number_of_tracks(input_ffmpeg_path)
 
+        # Por cada una de las lineas del .txt hay una track. Hay que contar el número de lineas.
         video_final_path = "../../shared_seminar2/number_of_tracks.txt"
         number_of_tracks = count_lines_txt(video_final_path)
 
@@ -395,32 +434,33 @@ def get_numer_of_tracks():
 
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
+    
+
+#### Ejemplo de petición, curl (cambiar localización del archivo) para la CMD de Windows: 
+# curl --location "http://localhost:5001/get_numer_of_tracks" ^
+# --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+# --output output_file.json
 
 ##################### 6)
 
 #Esta función genera un comando de ffmpeg que dado:
-# -Directorio_input: Directorio relativo del video
-# -Directorio_output: Directorio relativo del video producida
-# -Tipo: Tipo de chroma subsampling, ej. yuv420p
-# Genera una imagen con las dimensiones deseadas en el directorio introducido
+# -Directorio_input: Directorio relativo del video 
+# Genera una una versión del video con macroblocks y los vectores de movimiento.
 def motion_vectors(directorio_input):
     directorio_output = "../shared_seminar2/motion_vectors.mp4"
-    #Construcción de una lista de strings conteniendo el comando
-    # la opcion "y" hace que no pregunte si deseas substituir el directorio que ya existe. 
+    #Segun este blog oficial de ffmpeg: https://trac.ffmpeg.org/wiki/Debug/MacroblocksAndMotionVectors
+    #La opción de analizar los macroblock ha sido quitada en las versiones más recientes de ffmpeg. 
     command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-flags2", "+export_mvs", "-i", directorio_input,"-vf", "codecview=mv=pf+bf+bb", directorio_output ]
     try: 
         subprocess.run(command, check=True)
     except:
          return jsonify({'Error': 'Ese tipo de chroma subsampling no esta disponible'}), 400
 
-#Esta función cambia el chroma subsampling del video envíado:
+#Esta función genera una una versión del video con macroblocks y los vectores de movimiento:
 # -Método: Post
 # -Input:
 #         -Archivo input en la clave 'file' del formulario web
-#         -Tipo de Chroma subsampling en la clave 'data' del formulario web, formato json: {"Type":"yuv420p"}
-#               -Type: Por ejemplo: yuv420p, yuv422p, yuv444p, yuv420p10le, yuv422p10le, yuv444p10le
-# - Output: Video con las dimensiones deseadas
-
+# - Output: Video con los vectores de movimiento y los macroblocks
 @app_seminar2.route('/motion_vectors_macroblocks', methods=['POST'])
 def motion_vectors_macroblocks():
     delete_share_contents()
@@ -442,22 +482,24 @@ def motion_vectors_macroblocks():
 
         directorio_output = "../../shared_seminar2/motion_vectors.mp4"
         #Se devuelve el archivo que ha producido ffmpeg
-        return send_file(directorio_output, mimetype='video/mp4', as_attachment=True, download_name=f"video_chroma_subsampled.mp4")
+        return send_file(directorio_output, mimetype='video/mp4', as_attachment=True, download_name=f"video_motion_vectors_macroblocks.mp4")
 
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
+    
+
+#### Ejemplo de petición, curl (cambiar localización del archivo) para la CMD de Windows: 
+# curl --location "http://localhost:5001/motion_vectors_macroblocks" ^
+#  --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+#  --output output_file.mp4
     
 ##################### 7)
 
 #Esta función genera un comando de ffmpeg que dado:
 # -Directorio_input: Directorio relativo del video
-# -Directorio_output: Directorio relativo del video producida
-# -Tipo: Tipo de chroma subsampling, ej. yuv420p
-# Genera una imagen con las dimensiones deseadas en el directorio introducido
+# Genera un video con los histogramas YUV del video input
 def histogram_creator(directorio_input):
-    directorio_output = "../shared_seminar2/histograms.mp4"
-    #Construcción de una lista de strings conteniendo el comando
-    # la opcion "y" hace que no pregunte si deseas substituir el directorio que ya existe. 
+    directorio_output = "../shared_seminar2/histograms.mp4" 
     command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorio_input, "-vf", "histogram", directorio_output]
     try: 
         subprocess.run(command, check=True)
@@ -468,15 +510,11 @@ def histogram_creator(directorio_input):
 # -Método: Post
 # -Input:
 #         -Archivo input en la clave 'file' del formulario web
-#         -Tipo de Chroma subsampling en la clave 'data' del formulario web, formato json: {"Type":"yuv420p"}
-#               -Type: Por ejemplo: yuv420p, yuv422p, yuv444p, yuv420p10le, yuv422p10le, yuv444p10le
-# - Output: Video con las dimensiones deseadas
-
+# - Output: Video con los histogramas YUV del video input
 @app_seminar2.route('/YUV_histograms', methods=['POST'])
 def YUV_histograms():
     delete_share_contents()
     try:
-    
         #Extraer el archivo de la petición POST
         if 'file' not in request.files:
             return jsonify({"error": "La petición no tiene ningún archivo"}), 400
@@ -493,11 +531,16 @@ def YUV_histograms():
 
         directorio_output = "../../shared_seminar2/histograms.mp4"
         #Se devuelve el archivo que ha producido ffmpeg
-        return send_file(directorio_output, mimetype='video/mp4', as_attachment=True, download_name=f"video_chroma_subsampled.mp4")
+        return send_file(directorio_output, mimetype='video/mp4', as_attachment=True, download_name=f"video_histograms.mp4")
 
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
 
+### Se recomienda hacer desde postman! Curl no recibe bien este archivo. 
+#### Ejemplo de petición, curl (cambiar localización del archivo) para la CMD de Windows: 
+# curl --location "http://localhost:5001/YUV_histograms" ^
+#   --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+#   --output output_file.mp4
 
 if __name__ == '__main__':
     app_seminar2.run(host="0.0.0.0", port=5001)
