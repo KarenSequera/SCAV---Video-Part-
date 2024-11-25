@@ -343,6 +343,160 @@ def video_container_creator():
 
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
+    
+##################### 5)
+
+#Esta función genera un comando de ffmpeg que dado:
+# -Directorio_input: Directorio relativo del video
+# Genera una un json con 5 datos relevantes del video extraidos del comando ffprobe
+
+def get_number_of_tracks(directorio_input):
+    output_file = "../shared_seminar2/number_of_tracks.txt" 
+    
+    command = ["docker", "exec", "contenedor_ffmpeg", "sh", "-c", f"ffprobe -i  {directorio_input} 2>&1 | grep -E 'Stream' | grep -E 'Audio' > {output_file} "]
+
+    try: 
+        subprocess.run(command, check=True, capture_output=True, text=True)
+    except:
+        return jsonify({'Error': 'Error al extraer la informacion del video'}), 400
+        
+def count_lines_txt(directorio_input):
+    fichero = open("../shared_seminar2/number_of_tracks.txt")
+    return len(fichero.readlines())
+
+#Este endpoint devuelve un json con 5 caracteristicas del video introducido:
+# -Método: Post
+# -Input:
+#         -Archivo input en la clave 'file' del formulario web
+# -Output: Json con los datos: format_name, duration, size, bit_rate y encoder
+
+@app_seminar2.route('/get_numer_of_tracks', methods=['POST'])
+
+def get_numer_of_tracks():
+    delete_share_contents()
+    try:
+        #Extraer el archivo de la petición POST
+        if 'file' not in request.files:
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        
+        # Guardar el archivo dentro de la carpeta shared para que ffmpeg pueda acceder a el
+        input_ffmpeg_path = f"../shared_seminar2/{file.filename}"
+        file.save(input_ffmpeg_path)
+
+        get_number_of_tracks(input_ffmpeg_path)
+
+        video_final_path = "../../shared_seminar2/number_of_tracks.txt"
+        number_of_tracks = count_lines_txt(video_final_path)
+
+        return jsonify({'Number of tracks': str(number_of_tracks)}), 400
+
+    except (ValueError, TypeError) as e:
+        return jsonify({'error': str(e)}), 400
+
+##################### 6)
+
+#Esta función genera un comando de ffmpeg que dado:
+# -Directorio_input: Directorio relativo del video
+# -Directorio_output: Directorio relativo del video producida
+# -Tipo: Tipo de chroma subsampling, ej. yuv420p
+# Genera una imagen con las dimensiones deseadas en el directorio introducido
+def motion_vectors(directorio_input):
+    directorio_output = "../shared_seminar2/motion_vectors.mp4"
+    #Construcción de una lista de strings conteniendo el comando
+    # la opcion "y" hace que no pregunte si deseas substituir el directorio que ya existe. 
+    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-flags2", "+export_mvs", "-i", directorio_input,"-vf", "codecview=mv=pf+bf+bb", directorio_output ]
+    try: 
+        subprocess.run(command, check=True)
+    except:
+         return jsonify({'Error': 'Ese tipo de chroma subsampling no esta disponible'}), 400
+
+#Esta función cambia el chroma subsampling del video envíado:
+# -Método: Post
+# -Input:
+#         -Archivo input en la clave 'file' del formulario web
+#         -Tipo de Chroma subsampling en la clave 'data' del formulario web, formato json: {"Type":"yuv420p"}
+#               -Type: Por ejemplo: yuv420p, yuv422p, yuv444p, yuv420p10le, yuv422p10le, yuv444p10le
+# - Output: Video con las dimensiones deseadas
+
+@app_seminar2.route('/motion_vectors_macroblocks', methods=['POST'])
+def motion_vectors_macroblocks():
+    delete_share_contents()
+    try:
+    
+        #Extraer el archivo de la petición POST
+        if 'file' not in request.files:
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        
+        # Guardar el archivo dentro de la carpeta shared para que ffmpeg pueda acceder a el
+        input_ffmpeg_path = f"../shared_seminar2/{file.filename}"
+        file.save(input_ffmpeg_path)
+
+        # Transforma el video al formato deseado 
+        motion_vectors(input_ffmpeg_path)
+
+        directorio_output = "../../shared_seminar2/motion_vectors.mp4"
+        #Se devuelve el archivo que ha producido ffmpeg
+        return send_file(directorio_output, mimetype='video/mp4', as_attachment=True, download_name=f"video_chroma_subsampled.mp4")
+
+    except (ValueError, TypeError) as e:
+        return jsonify({'error': str(e)}), 400
+    
+##################### 7)
+
+#Esta función genera un comando de ffmpeg que dado:
+# -Directorio_input: Directorio relativo del video
+# -Directorio_output: Directorio relativo del video producida
+# -Tipo: Tipo de chroma subsampling, ej. yuv420p
+# Genera una imagen con las dimensiones deseadas en el directorio introducido
+def histogram_creator(directorio_input):
+    directorio_output = "../shared_seminar2/histograms.mp4"
+    #Construcción de una lista de strings conteniendo el comando
+    # la opcion "y" hace que no pregunte si deseas substituir el directorio que ya existe. 
+    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorio_input, "-vf", "histogram", directorio_output]
+    try: 
+        subprocess.run(command, check=True)
+    except:
+         return jsonify({'Error': 'Ese tipo de chroma subsampling no esta disponible'}), 400
+
+#Esta función cambia el chroma subsampling del video envíado:
+# -Método: Post
+# -Input:
+#         -Archivo input en la clave 'file' del formulario web
+#         -Tipo de Chroma subsampling en la clave 'data' del formulario web, formato json: {"Type":"yuv420p"}
+#               -Type: Por ejemplo: yuv420p, yuv422p, yuv444p, yuv420p10le, yuv422p10le, yuv444p10le
+# - Output: Video con las dimensiones deseadas
+
+@app_seminar2.route('/YUV_histograms', methods=['POST'])
+def YUV_histograms():
+    delete_share_contents()
+    try:
+    
+        #Extraer el archivo de la petición POST
+        if 'file' not in request.files:
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        
+        # Guardar el archivo dentro de la carpeta shared para que ffmpeg pueda acceder a el
+        input_ffmpeg_path = f"../shared_seminar2/{file.filename}"
+        file.save(input_ffmpeg_path)
+
+        # Transforma el video al formato deseado 
+        histogram_creator(input_ffmpeg_path)
+
+        directorio_output = "../../shared_seminar2/histograms.mp4"
+        #Se devuelve el archivo que ha producido ffmpeg
+        return send_file(directorio_output, mimetype='video/mp4', as_attachment=True, download_name=f"video_chroma_subsampled.mp4")
+
+    except (ValueError, TypeError) as e:
+        return jsonify({'error': str(e)}), 400
 
 
 if __name__ == '__main__':
