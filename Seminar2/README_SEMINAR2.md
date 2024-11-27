@@ -300,3 +300,21 @@ Petición que almacena el json:
     
 
 # **ENDPOINTS SEMINAR 2**
+
+Para los endpoints de este seminario, se recomienda usar POSTMAN para las requests con este formato:
+
+![Captura de pantalla 2024-11-27 173020](https://github.com/user-attachments/assets/893d1312-2883-451b-8a37-52bec61c6dd4)
+
+También vamos a incluir un ejemplo de petición con curl. 
+
+### **/resolution_changer POST**
+
+Este EndPoint recibe un video y la resolución deseada en formato json, y devuelve una version del video en dicha resolución. 
+
+Ejemplo de petición usando curl en la CMD:
+
+      curl --location "http://localhost:5001/resolution_changer" ^
+    --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+    --form "data={\"Alto\":\"100\",\"Ancho\":100}" ^
+    --output output_file.mp4
+
