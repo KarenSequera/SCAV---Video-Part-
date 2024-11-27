@@ -539,8 +539,8 @@ def YUV_histograms():
 ### Se recomienda hacer desde postman! Curl no recibe bien este archivo. 
 #### Ejemplo de petición, curl (cambiar localización del archivo) para la CMD de Windows: 
 # curl --location "http://localhost:5001/YUV_histograms" ^
-#   --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
-#   --output output_file.mp4
+#    --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+#    --output output_file.mp4
 
 if __name__ == '__main__':
     app_seminar2.run(host="0.0.0.0", port=5001)
