@@ -305,11 +305,16 @@ Para los endpoints de este seminario, se recomienda usar POSTMAN para las reques
 
 ![Captura de pantalla 2024-11-27 173020](https://github.com/user-attachments/assets/893d1312-2883-451b-8a37-52bec61c6dd4)
 
+Hemos creado un repositorio de POSTMAN con un ejemplo para cada uno de los ENDPOINTS: https://documenter.getpostman.com/view/39631696/2sAYBXAAd1
+Si se abre desde POSTMAN desktop y la API esta funcionando, se pueden ejecutar las requests que hemos creado. Solo haría falta cambiar el video de input ya que usa path relativo. 
+
+El formulario tiene dos campos, para el funcionamiento adecuado de la API tienen que llamarse "file" y "data". El campo de file contiene el video que se desea subir y el campo de data un json con la información necesaria. El campo de data no siempre es necesario, depende del endpoint.
+
 También vamos a incluir un ejemplo de petición con curl. 
 
 ### **/resolution_changer POST**
 
-Este EndPoint recibe un video y la resolución deseada en formato json, y devuelve una version del video en dicha resolución. 
+Este endpoint recibe un video en el campo "file" y la resolución deseada en formato json (ej. {"Alto":"100","Ancho":100}) en el campo de "data", y devuelve una version del video en dicha resolución. 
 
 Ejemplo de petición usando curl en la CMD:
 
@@ -318,3 +323,78 @@ Ejemplo de petición usando curl en la CMD:
     --form "data={\"Alto\":\"100\",\"Ancho\":100}" ^
     --output output_file.mp4
 
+
+### **/chroma_subsampling_changer POST**
+
+Este endpoint recibe un video en el campo "file" y el tipo de chroma subsampling deseado en formato json (ej.{"Type":"yuv420p"}) en el campo "data", y devuelve una versión del video en dicho formato de chroma subsampling. Agunos ejemplos de tipo de chroma subsampling son: yuv420p, yuv422p, yuv444p, yuv420p10le, yuv422p10le, yuv444p10le, etc. 
+
+Ejemplo de petición usando curl en la CMD:
+
+     #curl --location "http://localhost:5001/chroma_subsampling_changer" ^
+     --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+     --form "data={\"Type\":\"yuv420p\"}" ^
+     --output output_file.mp4
+
+### **/video_info POST**
+
+Este endpoint recibe un video en el campo de "file" y devuelve un json con 5 datos importantes del video. 
+
+Ejemplo de petición usando curl en la CMD:
+
+     #curl --location "http://localhost:5001/chroma_subsampling_changer" ^
+     --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+     --form "data={\"Type\":\"yuv420p\"}" ^
+     --output output_file.mp4
+
+Ejemplo de output:
+
+{
+    "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+    "duration": "20.063000",
+    "size": "21186520",
+    "bit_rate": "8447996",
+    "encoder": "Lavf58.29.100"
+}
+
+### **/video_container_creator POST**
+
+Este endpoint recibe un video en el campo de "file" y un bitrate en formato json (ej. {"Bitrate":"32k"}) en el campo de "data". Dado el video de input, este endpoint genera una versión del video de 20s y tres archivos de audio con diferentes formatos:  aac mono, mp3 estereo con el bitrate especificado y aac3. Por último, genera un contenedor mp4 que contiene el video y las diferentes pistas de audio y la envia al usuario. 
+
+Ejemplo de petición usando curl en la CMD:
+
+     curl --location "http://localhost:5001/video_container_creator" ^
+     --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+     --form "data={\"Bitrate\":\"32k\"}" ^
+     --output output_file.mp4
+
+### **/get_numer_of_tracks POST**
+
+Este endpoint recibe un video en el campo de "file" y devuelve un archivo json que contiene la información de cuantas pistas de audio tiene el video. 
+
+Ejemplo de petición usando curl en la CMD:
+
+      curl --location "http://localhost:5001/get_numer_of_tracks" ^
+      --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+      --output output_file.json
+      
+Ejemplo de output:
+
+{
+    "Number of tracks": "3"
+}
+
+### **/motion_vectors_macroblocks POST**
+
+Este endpoint recibe un video en el campo de "file" y devuelve una versión del video con los motion vectors.  
+
+Ejemplo de petición usando curl en la CMD:
+
+      curl --location "http://localhost:5001/motion_vectors_macroblocks" ^
+      --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+      --output output_file.mp4
+
+### **/YUV_histograms POST**
+
+Este endpoint recibe un video en el campo de "file" y devuelve una versión del video los histogramas YUV. Para este endpoint se recomienda el de POSTMAN!
+
+      ![Captura de pantalla 2024-11-27 200225](https://github.com/user-attachments/assets/e19cd932-1c31-4299-9a55-5a4fbfd0456a)
