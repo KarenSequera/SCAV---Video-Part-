@@ -65,7 +65,7 @@ def delete_uploads_contents():
 # -Método: Post
 # -Input:
 #         -Archivo input en la clave 'file' del formulario web
-#         -Dimensiones en la clave 'data' del formulario web, formato json:
+#         -Dimensiones en la clave 'data' del formulario web, formato json {"Alto":"100","Ancho":100} :
 #               -Ancho: Número de pixeles deseados para el ancho de la imagen
 #               -Alto: Número de pixeles deseados para el alto de la imagen
 # - Output: Video con las dimensiones deseadas
@@ -454,7 +454,7 @@ def motion_vectors(directorio_input):
     try: 
         subprocess.run(command, check=True)
     except:
-         return jsonify({'Error': 'Ese tipo de chroma subsampling no esta disponible'}), 400
+         return jsonify({'Error': 'Error al generar el video con los motion vectors'}), 400
 
 #Esta función genera una una versión del video con macroblocks y los vectores de movimiento:
 # -Método: Post
@@ -504,9 +504,9 @@ def histogram_creator(directorio_input):
     try: 
         subprocess.run(command, check=True)
     except:
-         return jsonify({'Error': 'Ese tipo de chroma subsampling no esta disponible'}), 400
+         return jsonify({'Error': 'Error al generar el video con los histogramas YUV'}), 400
 
-#Esta función cambia el chroma subsampling del video envíado:
+#Esta función genera un video con los histogramas YUV del video pasado como input:
 # -Método: Post
 # -Input:
 #         -Archivo input en la clave 'file' del formulario web
