@@ -18,7 +18,7 @@ services:
       - ./shared_lab1:/shared_lab1
       - ./shared_seminar2:/shared_seminar2 
     #Acceso a la capeta de uploads
-      - ./uploads:/uploads 
+      - ./encoding_ladder:/encoding_ladder 
 #Contenedor ffmpeg
   api-python:
   #localización del directorio que contiene la dockerfile
@@ -43,7 +43,7 @@ services:
       - ./shared_lab1:/shared_lab1
       - ./shared_seminar2:/shared_seminar2
     #Acceso a la capeta de uploads
-      - ./uploads:/uploads 
+      - ./encoding_ladder:/encoding_ladder 
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock  #Sin esto la API no puede ejecutar docker
 

@@ -58,6 +58,14 @@ def delete_uploads_contents():
         ruta_completa = os.path.join(directorio, archivo)
         os.remove(ruta_completa) 
 
+#Esta función limpia el directorio shared de contenidos 
+def delete_ladder_contents():
+    directorio = "../encoding_ladder"
+    #Iterar por los archivos del directorio
+    for archivo in os.listdir(directorio):
+        #Obtiene el directorio completo y los elimina
+        ruta_completa = os.path.join(directorio, archivo)
+        os.remove(ruta_completa) 
 
 ##################### 1)
 
@@ -578,7 +586,7 @@ def video_convert(directorio_input, codec):
         
     elif codec == "av1" or codec == "AV1":
         #El encoder 'libaom-av1' es experimental para usarlo hay que poner las flags '-strict -2'
-        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input,"-cpu-used", "4","-c:v", "libaom-av1","-strict", "-2", directorio_output]
+        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input,"-c:v", "libaom-av1","-strict", "experimental", directorio_output]
         try: 
             subprocess.run(command, check=True)
         except:
@@ -625,7 +633,66 @@ def video_codec_converter():
 #    --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
 #    --output output_file.mp4
 
+##################### 1)
 
+def encoding_ladder_videos(directorio_input):
+    resoluciones = [[640,360],[1280,720],[1920,1080],[2560,1140]]
+
+    for i in resoluciones:
+        ancho = i[0]
+        alto = i[1]
+        directorio_output = f"../shared_seminar2/video_{ancho}x{alto}.mp4" 
+        app_lab1.funcion_resolution_changer(directorio_input, directorio_output, ancho, alto)
+
+def encoding_ladder_master():
+    delete_ladder_contents()
+    resoluciones = [[640,360],[1280,720],[1920,1080],[2560,1140]]
+    master_path = '../encoding_ladder/master_%v.m3u8' 
+    directorios = [f"../shared_seminar2/video_{i[0]}x{i[1]}.mp4" for i in resoluciones]
+    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorios[0], "-i", directorios[1],"-i", directorios[2],"-i", directorios[3],
+               "-map", "0:v", "-map", "1:v", "-map", "2:v", "-map", "3:v",
+            "-map", "0:a", "-map", "0:a", "-map", "0:a", "-map", "0:a",
+            "-c:v", "copy", "-c:a", "copy",
+            "-f", "hls", "-var_stream_map", "v:0,a:0 v:1,a:1 v:2,a:2 v:3,a:3",
+            "-hls_time", "10", "-hls_playlist_type", "vod",
+            "-master_pl_name", "master.m3u8", master_path]
+    try: 
+        subprocess.run(command, check=True)        
+    except:
+        return jsonify({'Error': 'Error al generar el video'}), 400
+        
+
+
+@app_seminar2.route('/encoding_ladder_creator', methods=['POST'])
+def encoding_ladder_creator():
+    delete_share_contents()
+    try:
+        #Extraer el archivo de la petición POST
+        if 'file' not in request.files:
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        
+        # Guardar el archivo dentro de la carpeta shared para que ffmpeg pueda acceder a el
+        input_ffmpeg_path = f"../shared_seminar2/{file.filename}"
+        file.save(input_ffmpeg_path)
+
+        # Transforma el video al formato deseado 
+        encoding_ladder_videos(input_ffmpeg_path)
+        encoding_ladder_master()
+
+        #Se devuelve el archivo que ha producido ffmpeg
+        return  jsonify({'Output': 'El resultado se encuentra en el /encoding_ladder'}), 400
+
+    except (ValueError, TypeError) as e:
+        return jsonify({'error': str(e)}), 400
+
+### Se recomienda hacer desde postman! Curl no recibe bien este archivo. 
+#### Ejemplo de petición, curl (cambiar localización del archivo) para la CMD de Windows: 
+# curl --location "http://localhost:5001/YUV_histograms" ^
+#    --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+#    --output output_file.mp4
 
 if __name__ == '__main__':
     app_seminar2.run(host="0.0.0.0", port=5001)
