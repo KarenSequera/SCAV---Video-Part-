@@ -1,0 +1,53 @@
+version: '3'
+services:
+
+#Contenedor ffmpeg
+  ffmpeg:
+    build:
+    #localización del directorio que contiene la dockerfile
+      context: ./ffmpeg
+    container_name: contenedor_ffmpeg
+    #Opción de red para que pueda conectarse con la API
+    networks:
+      - app-network
+    #Comando para que el contenedor este siempre ejecutandose y no se detenga
+    command: ["bash", "-c", "tail -f /dev/null"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Asegura que ffmpeg también pueda acceder al docker daemon
+    #Acceso a la carpeta compartida
+      - ./shared_lab1:/shared_lab1
+      - ./shared_seminar2:/shared_seminar2 
+    #Acceso a la capeta de uploads
+      - ./uploads:/uploads 
+#Contenedor ffmpeg
+  api-python:
+  #localización del directorio que contiene la dockerfile
+    build:
+      context: ./api-python
+    container_name: api_python
+    #Con depends on, docker intentará iniciar primero el contenedor ffmpeg que el de la API (ya que la API lo necesita)
+    depends_on:
+      - ffmpeg
+    #Opción de red para que pueda conectarse con la API 
+    networks:
+      - app-network
+    #Mapea el puerto local 5000 al puerto 5000 del contenedor
+    #Mapea el puerto local 5001 al puerto 50001 del contenedor
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Monta el socket de Docker aquí también
+      - ./api-python:/app  # Asegura de que los archivos de la app estén disponibles dentro del contenedor
+      #Acceso a la carpeta compartida
+      - ./shared_lab1:/shared_lab1
+      - ./shared_seminar2:/shared_seminar2
+    #Acceso a la capeta de uploads
+      - ./uploads:/uploads 
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock  #Sin esto la API no puede ejecutar docker
+
+#Asegura que los contenedores no están disponibles al exterior a no ser que se habilite un puerto (como en el caso de la API)
+networks:
+  app-network:
+    driver: bridge
