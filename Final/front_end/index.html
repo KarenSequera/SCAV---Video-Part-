@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Processing API</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <h1>API de Procesamiento de Video</h1>
+
+    <!-- Formulario para subir video y cambiar resolución -->
+    <h2>Cambiar resolución del video</h2>
+    <form action="http://localhost:5001/resolution_changer" method="POST" enctype="multipart/form-data">
+        <label for="file">Seleccionar video:</label>
+        <input type="file" id="file" name="file" required><br><br>
+
+        <label for="resolution">Dimensiones (Alto x Ancho):</label>
+        <input type="text" id="data" name="data" placeholder='{"Alto": 720, "Ancho": 1280}' required><br><br>
+
+        <button type="submit">Subir y procesar video</button>
+    </form>
+
+    <hr>
+
+    <!-- Formulario para subir video y cambiar chroma subsampling -->
+    <h2>Cambiar Chroma Subsampling</h2>
+    <form action="http://localhost:5001/chroma_subsampling_changer" method="POST" enctype="multipart/form-data">
+        <label for="file">Seleccionar video:</label>
+        <input type="file" id="file" name="file" required><br><br>
+
+        <label for="chroma">Chroma Subsampling (ej. yuv420p):</label>
+        <input type="text" id="data" name="data" placeholder='{"Type": "yuv420p"}' required><br><br>
+
+        <button type="submit">Subir y cambiar chroma</button>
+    </form>
+
+    <hr>
+
+    <h3>Instrucciones</h3>
+    <p>1. Selecciona un video.</p>
+    <p>2. Introduce las dimensiones deseadas para el video (en el caso de cambiar la resolución) o el tipo de Chroma Subsampling.</p>
+    <p>3. Haz clic en "Subir y procesar video" para recibir el archivo procesado.</p>
+</body>
+</html>
