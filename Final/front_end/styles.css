@@ -1,0 +1,159 @@
+ /* Cambia el fondo de la página */
+ body {
+    background-color: #f8eeea; 
+    font-family: 'Roboto', Arial, sans-serif; 
+    color: #355C7D; 
+    text-align: center;
+    /*margin: 20px; */
+}
+
+/* Estilo del título */
+h1 {
+    font-family: 'Roboto', Arial, sans-serif; 
+    color: #355C7D; 
+    text-align: center; 
+    /*margin-top: 50px; */
+    align-self: center;
+    font-size: 50px; 
+    font-weight: bold; 
+}
+
+h2{
+    font-family: 'Roboto', Arial, sans-serif; 
+    color: #355C7D;
+    text-align: center;
+}
+
+h3 {
+    font-family: 'Roboto', Arial, sans-serif; 
+    color: #355C7D;
+}
+
+/* Estilo de los párrafos */
+p {
+    font-size: 16px; 
+    line-height: 1.6; 
+    color: #6C5B7B; 
+}
+
+/* Botones */
+button, .file-label {
+    background-color: #F67280; 
+    color: white;
+    text-align: center;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    display: inline-block; /* Asegura que el estilo se aplique bien al label */
+    text-align: center;
+}
+
+button:hover, .file-label:hover {
+    background-color: #C06C84; /* Verde oscuro al pasar el cursor */
+    text-align: center;
+}
+
+/* Botones */
+
+/* Contenedor de los botones */
+.button-container {
+    display: flex;
+    flex-direction: column;  
+    align-self: center;
+    align-items: center;     
+    gap: 15px;               
+    margin-top: 20px;        
+}
+  
+/* Estilo común para todos los botones */
+button {
+    padding: 15px 30px;  
+    font-size: 18px;      
+    border: none;         
+    border-radius: 8px;   
+    cursor: pointer;     
+    transition: background-color 0.3s ease; 
+}
+  
+.btn-type1 {
+    background-color: #F67280; 
+    color: white;               
+    text-align: center;         
+    padding: 10px 20px;         
+    font-size: 16px;            
+    border-radius: 5px;        
+    display: inline-block;     
+}
+.btn-type1:hover {
+    background-color: #C06C84;  
+    text-align: center;
+}
+  
+.btn-type2 {
+    background-color: #F67280; 
+    color: white;               
+    padding: 15px 30px;        
+    font-size: 30px;            
+    border-radius: 8px;   
+    height: 10%;  
+    width: 25%;   
+}
+.btn-type2:hover {
+    background-color: #C06C84;  /* Cambia el color al pasar el mouse */
+}
+
+
+/* Oculta el botón original del input file */
+input[type="file"] {
+    display: none;
+}
+
+#video-info {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #eaf4f4;
+}
+
+
+/* Estilos para el header */
+.main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #F67280;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+  
+/* Contenedor del logo */
+.logo-container {
+    text-align: center;     
+}
+  
+.logo {
+    height: 100px;
+    width: 100px;
+    object-fit: contain;
+    align-self: left;
+    margin:0;
+}
+  
+  
+.info-container {
+    display: flex;
+    flex-direction: column; 
+    align-items: center;    
+    text-align: center;    
+    padding: 0;
+    margin: 0;
+    gap: 0;
+}
+
+.students {
+    margin:0;
+    font-size: 20px;
+}

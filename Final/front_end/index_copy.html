@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<link rel="stylesheet" href="/styles.css"
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compresión de vídeo</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    
+</head>
+<body>
+    <h1>COMPRESIÓN DE VÍDEO</h1>
+
+    <hr>
+
+    <h2>Cambiar resolución del video</h2>
+    <form action="http://localhost:5001/resolution_changer" method="POST" enctype="multipart/form-data">
+        <label for="resolution-file" class="file-label">Seleccionar video</label>
+        <input type="file" id="resolution-file" name="file" required><br><br>
+
+        <label for="resolution-data">Dimensiones (Alto x Ancho):</label>
+        <input type="text" id="resolution-data" name="data" placeholder='{"Alto": 720, "Ancho": 1280}' required><br><br>
+
+        <button type="submit">Descargar vídeo</button>
+    </form>
+
+    <hr>
+
+    <!-- Subir video y cambiar chroma subsampling -->
+    <h2>Subsamplea el croma del vídeo</h2>
+    <form action="http://localhost:5001/chroma_subsampling_changer" method="POST" enctype="multipart/form-data">
+        <label for="chroma-file" class="file-label">Seleccionar video</label>
+        <input type="file" id="chroma-file" name="file" required><br><br>
+
+        <label for="chroma-data">Subsamplea el vídeo:</label>
+        <input type="text" id="chroma-data" name="data" placeholder='{"Type": "yuv420p"}' required><br><br>
+
+        <button type="submit">Descargar el vídeo subsampleado</button>
+    </form>
+
+    <hr>
+
+    <h2>Obtener información del video</h2>
+    <form action="http://localhost:5001/video_info" method="POST" enctype="multipart/form-data">
+        <label for="info-file" class="file-label">Seleccionar video</label>
+        <input type="file" id="info-file" name="file" required><br><br>
+        <button type="submit">Obtener información del video</button>
+    </form>
+
+    <hr>
+    <h2>Generar un video de 20 segundos con pistas de audio en múltiples formatos</h2>
+    <form id="video-container-form">
+        <label for="input-file" class="file-label">Seleccionar video</label>
+        <input type="file" id="input-file" name="file" required><br><br>
+
+        <label for="bitrate">Seleccione el bitrate deseado para la pista MP3 estéreo:</label>
+        <input type="text" id="bitrate" name="data" placeholder='{"Bitrate":"32k"}' required><br><br>
+
+        <button type="button" onclick="generateContainer()">Generar Contenedor MP4</button>
+    </form>
+    <div id="result">
+        <p>El archivo se ha generado con éxito: <a id="download-link" href="#" download>Descargar</a></p>
+    </div>
+    <hr>
+
+    <h2>Obten el número de pistas de audio que tiene el video</h2>
+
+    <form id="audio-track-form">
+        <label for="input-file" class="file-label">Seleccionar video</label>
+        <input type="file" id="input-file" name="file" required><br><br>
+
+        <button type="button" onclick="getAudioTracks()">Obtener Número de Pistas</button>
+    </form>
+
+    <div id="result">
+        <p id="number-of-tracks">Número de pistas de audio: </p>
+    </div>
+
+    <script>
+        async function getAudioTracks() {
+            const fileInput = document.getElementById('input-file');
+            const resultDiv = document.getElementById('result');
+            const tracksParagraph = document.getElementById('number-of-tracks');
+
+            // Verificar que se haya seleccionado un archivo
+            if (!fileInput.files.length) {
+                alert('Por favor, selecciona un video.');
+                return;
+            }
+
+            // Crear el objeto FormData para enviar el archivo
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                // Enviar el archivo al servidor
+                const response = await fetch('http://localhost:5001/get_numer_of_tracks', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                // Verificar si la respuesta fue exitosa
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Error al procesar el video.');
+                }
+
+                // Leer el número de pistas del JSON de respuesta
+                const data = await response.json();
+                const numberOfTracks = data['Number of tracks'];
+
+                // Mostrar el resultado en la página
+                tracksParagraph.textContent = `Número de pistas de audio: ${numberOfTracks}`;
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error: ${error.message}`);
+            }
+        }
+    </script>
+    <hr>
+    <h2>Visualiza motion vectors de un video</h2>
+
+    <form id="motion-vectors-form">
+        <label for="input-file" class="file-label">Seleccionar video</label>
+        <input type="file" id="input-file" name="file" required><br><br>
+
+        <button type="button" onclick="generateMotionVectors()">Generar Motion Vectors</button>
+    </form>
+
+    <div id="result">
+        <p>¡El video con vectores de movimiento se ha generado exitosamente!</p>
+        <a id="download-link" href="#" download>Descargar Video</a>
+    </div>
+
+    <script>
+        async function generateMotionVectors() {
+            const fileInput = document.getElementById('input-file');
+            const resultDiv = document.getElementById('result');
+            const downloadLink = document.getElementById('download-link');
+
+            // Verificar que se haya seleccionado un archivo
+            if (!fileInput.files.length) {
+                alert('Por favor, selecciona un video.');
+                return;
+            }
+
+            // Crear el objeto FormData para enviar el archivo
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                // Enviar el archivo al servidor
+                const response = await fetch('http://localhost:5001/motion_vectors_macroblocks', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                // Verificar si la respuesta fue exitosa
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Error al procesar el video.');
+                }
+
+                // Crear un enlace para descargar el archivo generado
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                downloadLink.href = url;
+                downloadLink.download = 'video_motion_vectors_macroblocks.mp4';
+
+                // Mostrar el enlace de descarga
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error: ${error.message}`);
+            }
+        }
+    </script>
+    <hr>
+
+</body>
+</html>
