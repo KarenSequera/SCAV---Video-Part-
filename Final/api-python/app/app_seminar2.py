@@ -508,7 +508,7 @@ def motion_vectors_macroblocks():
 # Genera un video con los histogramas YUV del video input
 def histogram_creator(directorio_input):
     directorio_output = "../shared_seminar2/histograms.mp4" 
-    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorio_input, "-vf", "histogram", directorio_output]
+    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorio_input, "-vf", "split=2[a][b],[b]histogram,format=yuva444p[hh],[a][hh]overlay", directorio_output]
     try: 
         subprocess.run(command, check=True)
     except:
@@ -627,11 +627,6 @@ def video_codec_converter():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
 
-### Se recomienda hacer desde postman! Curl no recibe bien este archivo. 
-#### Ejemplo de petición, curl (cambiar localización del archivo) para la CMD de Windows: 
-# curl --location "http://localhost:5001/YUV_histograms" ^
-#    --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
-#    --output output_file.mp4
 
 ##################### 1)
 
@@ -688,11 +683,6 @@ def encoding_ladder_creator():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
 
-### Se recomienda hacer desde postman! Curl no recibe bien este archivo. 
-#### Ejemplo de petición, curl (cambiar localización del archivo) para la CMD de Windows: 
-# curl --location "http://localhost:5001/YUV_histograms" ^
-#    --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
-#    --output output_file.mp4
 
 if __name__ == '__main__':
     app_seminar2.run(host="0.0.0.0", port=5001)
