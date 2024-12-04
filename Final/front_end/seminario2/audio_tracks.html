@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<link rel="stylesheet" href="../styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Tracks</title>
+    <link rel="icon" href="../images/logo.png" type="../images/logo.png">
+    
+</head>
+<body>
+    <h1>Audio Tracks</h1>
+    <hr>
+    <h2>Este endpoint cuenta cuantas pistas de audio tiene un vídeo</h2>
+    <hr>
+    <h2>Selecciona el vídeo que deseas analizar </h2>
+    <form action="http://localhost:5001/get_numer_of_tracks" method="POST" enctype="multipart/form-data">
+       
+        <label for="file" class="file-label">Seleccionar video</label>
+        <input type="file" id="file" name="file" required><br><br>
+        <p id="file-name" style="display:none"></p>
+        <h2>Pulsa el botón para generar un json con los datos</h2>
+        <button type="submit">Obtener información del video</button>
+        
+    </form>
+    
+    <script>
+        // Obtener el input del archivo y el elemento para mostrar el nombre
+        const fileInput = document.getElementById('file');
+        const fileNameDisplay = document.getElementById('file-name');
+
+        // Escuchar el evento de cambio del input de archivo
+        fileInput.addEventListener('change', function() {
+            // Verificar si se seleccionó un archivo
+            if (fileInput.files.length > 0) {
+                // Mostrar el nombre del archivo seleccionado
+                fileNameDisplay.textContent = `Archivo seleccionado: ${fileInput.files[0].name}`;
+                fileNameDisplay.style.display = 'block'; // Hacer visible el texto
+            }
+        });
+    </script>
+
+</body>
+</html>
