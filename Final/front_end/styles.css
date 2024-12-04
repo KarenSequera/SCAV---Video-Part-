@@ -92,12 +92,17 @@ button {
   
 .btn-type2 {
     background-color: #F67280; 
-    color: white;               
-    padding: 15px 30px;        
-    font-size: 30px;            
-    border-radius: 8px;   
-    height: 10%;  
-    width: 25%;   
+    color: white;   
+    text-align: center;
+    padding: 0;              /* Elimina el padding para evitar que afecte la alineación */
+    font-size: 22px;         /* Ajusta el tamaño del texto */
+    border-radius: 10px;
+    height: 60px;            /* Define una altura fija */
+    width: 160px;            /* Define un ancho fijo */
+    display: flex;           /* Usa Flexbox para alinear el contenido */
+    justify-content: center; /* Centra el texto horizontalmente */
+    align-items: center;     /* Centra el texto verticalmente */
+    line-height: 1.2;        
 }
 .btn-type2:hover {
     background-color: #C06C84;  /* Cambia el color al pasar el mouse */
