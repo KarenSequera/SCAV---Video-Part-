@@ -104,8 +104,8 @@ button {
     padding: 0;              /* Elimina el padding para evitar que afecte la alineación */
     font-size: 22px;         /* Ajusta el tamaño del texto */
     border-radius: 10px;
-    height: 60px;            /* Define una altura fija */
-    width: 160px;            /* Define un ancho fijo */
+    height: 70px;            /* Define una altura fija */
+    width: 300px;            /* Define un ancho fijo */
     display: flex;           /* Usa Flexbox para alinear el contenido */
     justify-content: center; /* Centra el texto horizontalmente */
     align-items: center;     /* Centra el texto verticalmente */
