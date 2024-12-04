@@ -60,7 +60,7 @@ button:hover, .file-label:hover {
 /* Contenedor de los botones */
 .button-container {
     display: flex;
-    flex-direction: column;  
+    flex-direction: row;  
     align-self: center;
     align-items: center;     
     gap: 15px;               
