@@ -13,8 +13,8 @@
     <hr>
     <h2>Selecciona el vídeo al que deseas cambiar la resolución</h2>
     <form action="http://localhost:5001/resolution_changer" method="POST" enctype="multipart/form-data" onsubmit="return prepararJSON(event)">
-        <label for="resolution-file" class="file-label">Seleccionar vídeo</label>
-        <input type="file" id="resolution-file" name="file" require ><br><br>
+        <label for="file" class="file-label">Seleccionar vídeo</label>
+        <input type="file" id="file" name="file" require ><br><br>
         
         <h2>Introduce la resolución</h2>
 
@@ -24,7 +24,7 @@
         <label for="ancho">Ancho:</label>
         <input type="number" id="ancho" placeholder="Ej: 1280" required><br><br>
 
-        <input type="hidden" id="resolution-data" name="data">
+        <input type="hidden" id="data" name="data">
         <h2>Pulsa el botón para descargar el vídeo</h2>
         <button type="submit">Convertir</button>
     </form>
@@ -34,7 +34,7 @@
 <script>
     function prepararJSON(event) {
         // Verificar si el archivo está vacío (ningún archivo seleccionado)
-        const fileInput = document.getElementById('resolution-file');
+        const fileInput = document.getElementById('file');
         if (!fileInput.files.length) {
             alert('Por favor, selecciona un video.');
             event.preventDefault(); // Detiene el envío del formulario
@@ -54,7 +54,7 @@
 
         // Crear el JSON con el alto y el ancho
         const stringData = `{"Alto": ${alto}, "Ancho": ${ancho}}`;
-        document.getElementById("resolution-data").value = stringData;
+        document.getElementById("data").value = stringData;
         return true;
     }
 

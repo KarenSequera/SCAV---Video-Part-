@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<link rel="stylesheet" href="../styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificador resolución</title>
+    <link rel="icon" href="../images/logo.png" type="../images/logo.png">
+    
+</head>
+<body>
+    <h1>CREADOR CONTENEDOR MP4</h1>
+    <hr>
+    <h2>Este endpoint genera un contenedor mp4 que contiene una version de 20 segundos del video subido y el audio en tres formatos diferentes: aac mono,
+    mp3 estereo con el bitrate especificado y aac3.  </h2>
+    <hr>
+    <h2>Selecciona el vídeo de base</h2>
+    <form action="http://localhost:5001/video_container_creator" method="POST" enctype="multipart/form-data" onsubmit="return prepararJSON(event)">
+        <label for="file" class="file-label">Seleccionar vídeo</label>
+        <input type="file" id="file" name="file" require ><br><br>
+
+        <h2>Introduce el bitrate deseado para el audio mp3</h2>
+        <label for="Bitrate">Bitrate: </label>
+        <input type="text" id="data" placeholder="Ej: 31k" required><br><br>
+        <input type="hidden" id="json" name="data">
+        <h2>Pulsa el botón para descargar el contenedor</h2>
+        <button type="submit">Convertir</button>
+    </form>
+</body>
+
+
+<script>
+    function prepararJSON(event) {
+        // Verificar si el archivo está vacío (ningún archivo seleccionado)
+        const fileInput = document.getElementById('file');
+        if (!fileInput.files.length) {
+            alert('Por favor, selecciona un video.');
+            event.preventDefault(); // Detiene el envío del formulario
+            return false;
+        }
+
+        // Obtener los valores del campo de bitrate
+        const bitrate = document.getElementById("data").value;
+        
+        // Validar que se haya introducido un valor
+        if (!bitrate) {
+            alert("Por favor, introduce el bitrate.");
+            event.preventDefault(); // Detiene el envío del formulario
+            return false;
+        }
+
+        // Crear el JSON con el chroma subsampling
+        const stringData = `{"Bitrate":"${bitrate}"}`;
+        document.getElementById("json").value = stringData;
+        return true;
+    }
+
+</script>
+
+</html>

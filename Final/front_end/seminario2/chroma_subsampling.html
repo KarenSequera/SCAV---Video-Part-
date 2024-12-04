@@ -13,12 +13,12 @@
     <hr>
     <h2>Selecciona el vídeo al que deseas cambiar el chroma subsampling</h2>
     <form action="http://localhost:5001/chroma_subsampling_changer" method="POST" enctype="multipart/form-data" onsubmit="return prepararJSON(event)">
-        <label for="resolution-file" class="file-label">Seleccionar vídeo</label>
-        <input type="file" id="resolution-file" name="file" require ><br><br>
+        <label for="file" class="file-label">Seleccionar vídeo</label>
+        <input type="file" id="file" name="file" require ><br><br>
 
         <h2>Introduce el tipo de chroma subsampling</h2>
         <label for="alto">Chroma Subsampling:</label>
-        <input type="text" id="chroma-data" placeholder="Ej: yuv420p" required><br><br>
+        <input type="text" id="data" placeholder="Ej: yuv420p" required><br><br>
         <input type="hidden" id="json" name="data">
 
         <h2>Pulsa el botón para descargar el vídeo</h2>
@@ -30,7 +30,7 @@
 <script>
     function prepararJSON(event) {
         // Verificar si el archivo está vacío (ningún archivo seleccionado)
-        const fileInput = document.getElementById('resolution-file');
+        const fileInput = document.getElementById('file');
         if (!fileInput.files.length) {
             alert('Por favor, selecciona un video.');
             event.preventDefault(); // Detiene el envío del formulario
@@ -38,7 +38,7 @@
         }
 
         // Obtener los valores del campo de chroma subsampling
-        const chroma = document.getElementById("chroma-data").value;
+        const chroma = document.getElementById("data").value;
         
         //Subsamplings válidos sacados de la página web ffmpeg
         const validChromaValues = [
