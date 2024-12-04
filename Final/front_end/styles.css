@@ -29,6 +29,13 @@ h3 {
     color: #355C7D;
 }
 
+hr{
+    border: none;         /* Elimina el estilo predeterminado */
+    height: 2px;          /* Grosor de la línea */
+    background-color: #C06C84; /* Color de la línea */
+    width: 80%;           /* Ancho de la línea (80% del contenedor) */
+}
+
 /* Estilo de los párrafos */
 p {
     font-size: 16px; 
@@ -166,5 +173,4 @@ input[type="file"] {
     display: grid;
     grid-template-columns: repeat(4, 1fr); /* 4 columnas iguales */
     gap: 20px; /* Espacio entre las columnas */
-    margin: 20px; /* Margen adicional */
 }

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<link rel="stylesheet" href="../styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificador resolución</title>
+    <link rel="icon" href="../images/logo.png" type="../images/logo.png">
+    
+</head>
+<body>
+    <h1>MODIFICADOR RESOLUCIÓN</h1>
+    <hr>
+    <h2>Selecciona el vídeo al que deseas cambiar la resolución</h2>
+    <form action="http://localhost:5001/resolution_changer" method="POST" enctype="multipart/form-data" onsubmit="return prepararJSON(event)">
+        <label for="resolution-file" class="file-label">Seleccionar vídeo</label>
+        <input type="file" id="resolution-file" name="file" require ><br><br>
+
+        <label for="alto">Alto:</label>
+        <input type="number" id="alto" placeholder="Ej: 720" required><br><br>
+
+        <label for="ancho">Ancho:</label>
+        <input type="number" id="ancho" placeholder="Ej: 1280" required><br><br>
+
+        <input type="hidden" id="resolution-data" name="data">
+        <button type="submit">Convertir</button>
+    </form>
+    <hr>
+    <h2>Último vídeo generado</h2>
+    <video id="video-player" controls>
+        <source id="video-source" type="video/mp4" src=´../../shared_seminar2/output_{ancho}x{alto}.mp4´>
+        Tu navegador no soporta el formato de video.
+    </video>
+</body>
+
+
+<script>
+    function prepararJSON(event) {
+        // Verificar si el archivo está vacío (ningún archivo seleccionado)
+        const fileInput = document.getElementById('resolution-file');
+        if (!fileInput.files.length) {
+            alert('Por favor, selecciona un video.');
+            event.preventDefault(); // Detiene el envío del formulario
+            return false;
+        }
+
+        // Obtener los valores de los campos "Alto" y "Ancho"
+        const alto = document.getElementById("alto").value;
+        const ancho = document.getElementById("ancho").value;
+
+        // Validar que ambos valores sean números válidos
+        if (!alto || !ancho || isNaN(alto) || isNaN(ancho)) {
+            alert("Por favor, ingresa valores numéricos válidos para Alto y Ancho.");
+            event.preventDefault(); // Detiene el envío del formulario
+            return false;
+        }
+
+        // Crear el JSON y asignarlo al campo oculto
+        const stringData = `{"Alto": ${alto}, "Ancho": ${ancho}}`;
+        document.getElementById("resolution-data").value = stringData;
+        return true;
+    }
+
+    async function mostrarVideo() {
+        // Generar la URL del video con los valores de resolución
+        var videoUrl = `../../shared_seminar2/output_${ancho}x${alto}.mp4`;
+        // Actualizar el atributo src del video
+        var videoSource = document.getElementById('video-source');
+        videoSource.src = videoUrl;
+
+        // Recargar el video con la nueva fuente
+        var videoPlayer = document.getElementById('video-player');
+        videoPlayer.load(); // Recargar el video
+    }
+</script>
+
+</html>
