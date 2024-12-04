@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<link rel="stylesheet" href="../styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificador resolución</title>
+    <link rel="icon" href="../images/logo.png" type="../images/logo.png">
+    
+</head>
+<body>
+    <h1>MODIFICADOR CHROMA SUBSAMPLING</h1>
+    <hr>
+    <h2>Selecciona el vídeo al que deseas cambiar el chroma subsampling</h2>
+    <form action="http://localhost:5001/chroma_subsampling_changer" method="POST" enctype="multipart/form-data" onsubmit="return prepararJSON(event)">
+        <label for="resolution-file" class="file-label">Seleccionar vídeo</label>
+        <input type="file" id="resolution-file" name="file" require ><br><br>
+
+        <h2>Introduce el tipo de chroma subsampling</h2>
+        <label for="alto">Chroma Subsampling:</label>
+        <input type="text" id="chroma-data" placeholder="Ej: yuv420p" required><br><br>
+        <input type="hidden" id="json" name="data">
+
+        <h2>Pulsa el botón para descargar el vídeo</h2>
+        <button type="submit">Convertir</button>
+    </form>
+</body>
+
+
+<script>
+    function prepararJSON(event) {
+        // Verificar si el archivo está vacío (ningún archivo seleccionado)
+        const fileInput = document.getElementById('resolution-file');
+        if (!fileInput.files.length) {
+            alert('Por favor, selecciona un video.');
+            event.preventDefault(); // Detiene el envío del formulario
+            return false;
+        }
+
+        // Obtener los valores del campo de chroma subsampling
+        const chroma = document.getElementById("chroma-data").value;
+        
+        //Subsamplings válidos sacados de la página web ffmpeg
+        const validChromaValues = [
+            "yuv420p",
+            "yuv422p",
+            "yuv444p",
+            "yuv420p10le",
+            "yuv422p10le",
+            "yuv444p10le"
+        ];
+
+
+        // Validar que ambos valores sean números válidos
+        if (!validChromaValues.includes(chroma)) {
+            alert("Por favor, ingresa un valor de chroma subsampling válido (yuv420p, yuv422p, yuv444p, yuv420p10le, yuv422p10le, yuv444p10le).");
+            event.preventDefault(); // Detiene el envío del formulario
+            return false;
+        }
+
+        // Crear el JSON con el chroma subsampling
+        const stringData = `{"Type": "${chroma}"}`;
+        document.getElementById("json").value = stringData;
+        return true;
+    }
+
+</script>
+
+</html>

@@ -15,6 +15,8 @@
     <form action="http://localhost:5001/resolution_changer" method="POST" enctype="multipart/form-data" onsubmit="return prepararJSON(event)">
         <label for="resolution-file" class="file-label">Seleccionar vídeo</label>
         <input type="file" id="resolution-file" name="file" require ><br><br>
+        
+        <h2>Introduce la resolución</h2>
 
         <label for="alto">Alto:</label>
         <input type="number" id="alto" placeholder="Ej: 720" required><br><br>
@@ -23,14 +25,9 @@
         <input type="number" id="ancho" placeholder="Ej: 1280" required><br><br>
 
         <input type="hidden" id="resolution-data" name="data">
+        <h2>Pulsa el botón para descargar el vídeo</h2>
         <button type="submit">Convertir</button>
     </form>
-    <hr>
-    <h2>Último vídeo generado</h2>
-    <video id="video-player" controls>
-        <source id="video-source" type="video/mp4" src=´../../shared_seminar2/output_{ancho}x{alto}.mp4´>
-        Tu navegador no soporta el formato de video.
-    </video>
 </body>
 
 
@@ -55,23 +52,12 @@
             return false;
         }
 
-        // Crear el JSON y asignarlo al campo oculto
+        // Crear el JSON con el alto y el ancho
         const stringData = `{"Alto": ${alto}, "Ancho": ${ancho}}`;
         document.getElementById("resolution-data").value = stringData;
         return true;
     }
 
-    async function mostrarVideo() {
-        // Generar la URL del video con los valores de resolución
-        var videoUrl = `../../shared_seminar2/output_${ancho}x${alto}.mp4`;
-        // Actualizar el atributo src del video
-        var videoSource = document.getElementById('video-source');
-        videoSource.src = videoUrl;
-
-        // Recargar el video con la nueva fuente
-        var videoPlayer = document.getElementById('video-player');
-        videoPlayer.load(); // Recargar el video
-    }
 </script>
 
 </html>
