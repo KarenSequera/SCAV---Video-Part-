@@ -16,6 +16,8 @@
         <label for="file" class="file-label">Seleccionar vídeo</label>
         <input type="file" id="file" name="file" require ><br><br>
         
+        <p id="file-name" style="display:none"></p>
+
         <h2>Introduce la resolución</h2>
 
         <label for="alto">Alto:</label>
@@ -28,6 +30,23 @@
         <h2>Pulsa el botón para descargar el vídeo</h2>
         <button type="submit">Convertir</button>
     </form>
+
+    <script>
+        // Obtener el input del archivo y el elemento para mostrar el nombre
+        const fileInput = document.getElementById('file');
+        const fileNameDisplay = document.getElementById('file-name');
+    
+        // Escuchar el evento de cambio del input de archivo
+        fileInput.addEventListener('change', function() {
+            // Verificar si se seleccionó un archivo
+            if (fileInput.files.length > 0) {
+                // Mostrar el nombre del archivo seleccionado
+                fileNameDisplay.textContent = `Archivo seleccionado: ${fileInput.files[0].name}`;
+                fileNameDisplay.style.display = 'block'; // Hacer visible el texto
+            }
+        });
+    </script>
+    
 </body>
 
 
