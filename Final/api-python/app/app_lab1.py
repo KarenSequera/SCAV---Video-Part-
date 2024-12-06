@@ -9,9 +9,10 @@ from skimage.io import imread
 from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 import unit_test
+from flask_cors import CORS
 
 app_lab1 = Flask(__name__)
-
+CORS(app_lab1)
 ###############################################################################
 ##################### LAB 1
 

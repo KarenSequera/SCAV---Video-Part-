@@ -3,9 +3,10 @@ import subprocess
 import os
 import json
 import app_lab1
+from flask_cors import CORS
 
 app_seminar2 = Flask(__name__)
-
+CORS(app_seminar2)
 ###############################################################################
 
 ##################### SEMINARIO 2

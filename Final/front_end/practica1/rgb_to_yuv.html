@@ -12,7 +12,7 @@
     <hr>
     <h2>Este endpoint convierte las coordenadas RGB a YUV</h2>
     <hr>
-    <form action="http://localhost:5000/rgb_to_yuv" method="POST" enctype="multipart/form-data" onsubmit="return prepararJSON(event)">
+    <form id="rgbForm" onsubmit="return prepararJSON(event)">
     
         <h2>Introduce los valores RGB</h2>
 
@@ -30,31 +30,55 @@
         <h2>Pulsa el botón para convertir</h2>
         <button type="submit">Convertir</button>
     </form>
-   
-</body>
-<script>
-    function prepararJSON(event) {
-       
-        // Obtener los valores de los campos "Alto" y "Ancho"
+
+    <h3>Resultado de la conversión:</h3>
+    <pre id="resultado"></pre>
+
+    <script>
+    async function prepararJSON(event) {
+        event.preventDefault(); // Evita el envío tradicional del formulario
+
+        // Obtener los valores de los campos RGB
         const r = document.getElementById("r").value;
         const g = document.getElementById("g").value;
         const b = document.getElementById("b").value;
 
-
         // Validar que ambos valores sean números válidos
         if (!r || !g || !b ||  isNaN(r) || isNaN(g) || isNaN(b) || r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255){
             alert("Por favor, ingresa valores numéricos válidos para RGB (de 0 a 255).");
-            event.preventDefault(); // Detiene el envío del formulario
             return false;
         }
 
-        // Crear el JSON con el alto y el ancho
-        const stringData = `{"R": ${r}, "G": ${g}, "B":${b}}`;
-        document.getElementById("data").value = stringData;
-        return true;
-    }
+        // Crear el objeto JSON
+        const stringData = JSON.stringify({ "R": parseInt(r), "G": parseInt(g), "B": parseInt(b) });
 
-</script>
+        // Cuando se envia el formulario
+        const formData = new FormData();
+        formData.append("data", stringData);
+
+        try {
+            const response = await fetch('http://localhost:5000/rgb_to_yuv', {
+                method: 'POST',
+                body: formData
+            });
+
+            // Verificar y mostrar en pantalla el resultado de la converion
+            if (response.ok) {
+                const resultJson = await response.json();
+                const string = `Y: ${resultJson.Y} U: ${resultJson.U} V: ${resultJson.V} `
+                document.getElementById("resultado").textContent = string; // Mostrar el JSON de forma legible
+            } else {
+                alert("Hubo un error con la conversión. Inténtalo nuevamente.");
+            }
+        } catch (error) {
+            console.error("Error en la solicitud:", error);
+            alert("Ocurrió un error al procesar la solicitud.");
+        }
+    }
+    </script>
+</body>
+</html>
+
 
 
 
