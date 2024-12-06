@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<link rel="stylesheet" href="../styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RGB to YUV</title>
+    <link rel="icon" href="../images/logo.png" type="../images/logo.png">    
+</head>
+<body>
+    <h1>RGB TO YUV</h1>
+    <hr>
+    <h2>Este endpoint convierte las coordenadas RGB a YUV</h2>
+    <hr>
+    <form action="http://localhost:5000/rgb_to_yuv" method="POST" enctype="multipart/form-data" onsubmit="return prepararJSON(event)">
+    
+        <h2>Introduce los valores RGB</h2>
+
+        <label for="r">R:</label>
+        <input type="number" id="r" placeholder="Ej: 50" required><br><br>
+
+        <label for="g">G:</label>
+        <input type="number" id="g" placeholder="Ej: 90" required><br><br>
+
+        <label for="b">B:</label>
+        <input type="number" id="b" placeholder="Ej: 30" required><br><br>
+
+        <input type="hidden" id="data" name="data">
+
+        <h2>Pulsa el botón para convertir</h2>
+        <button type="submit">Convertir</button>
+    </form>
+   
+</body>
+<script>
+    function prepararJSON(event) {
+       
+        // Obtener los valores de los campos "Alto" y "Ancho"
+        const r = document.getElementById("r").value;
+        const g = document.getElementById("g").value;
+        const b = document.getElementById("b").value;
+
+
+        // Validar que ambos valores sean números válidos
+        if (!r || !g || !b ||  isNaN(r) || isNaN(g) || isNaN(b) || r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255){
+            alert("Por favor, ingresa valores numéricos válidos para RGB (de 0 a 255).");
+            event.preventDefault(); // Detiene el envío del formulario
+            return false;
+        }
+
+        // Crear el JSON con el alto y el ancho
+        const stringData = `{"R": ${r}, "G": ${g}, "B":${b}}`;
+        document.getElementById("data").value = stringData;
+        return true;
+    }
+
+</script>
+
+
+

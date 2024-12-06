@@ -47,8 +47,7 @@ class Color_Translator:
 
 @app_lab1.route('/rgb_to_yuv', methods=['POST'])
 def rgb_to_yuv():
-    data = request.get_json()    
-
+    data = json.loads(request.form.get('data'))    
     try:
         R = data['R']
         G = data['G']
@@ -68,13 +67,10 @@ def rgb_to_yuv():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
     
-#Comando PowerShell para probarlo
-#Invoke-WebRequest -Uri http://localhost:5000/rgb_to_yuv -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"R":255,"G":100,"B":50}' -ContentType "application/json"
-
 ## YUV to RBG
 @app_lab1.route('/yuv_to_rgb', methods=['POST'])
 def yuv_to_rgb():
-    data = request.get_json()    
+    data = json.loads(request.form.get('data'))  
 
     try:
         Y = data['Y']
@@ -93,9 +89,6 @@ def yuv_to_rgb():
         return jsonify({'error': f'Falta Parametro: {e}'}), 400
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
-
-#Comando PowerShell para probarlo
-#Invoke-WebRequest -Uri http://localhost:5000/yuv_to_rgb -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Y":128,"U":128,"V":128}' -ContentType "application/json"
 
 ##############################################
 
@@ -170,7 +163,7 @@ def funcion_serpentine(matriz):
 
 @app_lab1.route('/serpentine', methods=['POST'])
 def serpentine():
-    data = request.get_json() 
+    data = json.loads(request.form.get('data'))   
     try:
         matriz = data['Matriz']   
         output = funcion_serpentine(matriz)
@@ -182,9 +175,6 @@ def serpentine():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
     
-#Comando PowerShell para probarlo
-#Invoke-WebRequest -Uri http://localhost:5000/serpentine -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Matriz":[[1,2,6,7,14],[3,5,8,13,15],[4,9,12,16,19],[10,11,17,18,20]]}' -ContentType "application/json"
-
 ##############################################
 
 #Esta función implementa el run_lenght algoritmo presentado en las slides
@@ -213,7 +203,7 @@ def funcion_run_lenght(list):
 
 @app_lab1.route('/run_lenght', methods=['POST'])
 def run_lenght():
-    data = request.get_json() 
+    data = json.loads(request.form.get('data'))   
     try:
         list = data['Data_stream']  
         output_list = funcion_run_lenght(list)
@@ -225,9 +215,6 @@ def run_lenght():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
     
-#Comando PowerShell para probarlo    
-#Invoke-WebRequest -Uri http://localhost:5000/run_lenght -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"Data_stream":[0, 0, 3, 4, 8, 6, 33, 0, 0, 0, 4]}' -ContentType "application/json"
-
 ##############################################
 
 # -Directorio_input: Directorio relativo de la imagen de entrada
