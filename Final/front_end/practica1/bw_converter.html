@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<link rel="stylesheet" href="../styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Black & White</title>
+    <link rel="icon" href="../images/logo.png" type="../images/logo.png">
+    
+</head>
+<body>
+    <h1>CONVERTIDOR A BLANCO Y NEGRO</h1>
+    <hr>
+    <h2>Este endpoint genera una versión del vídeo/imagen en el blanco y negro</h2>
+    <hr>
+    <h2> Selecciona el vídeo/imagen al que deseas cambiar a blanco y negro <h2>
+
+    <form action="http://localhost:5000/bw_converter" method="POST" enctype="multipart/form-data" onsubmit="return prepararJSON(event)">
+        <label for="file" class="file-label">Seleccionar vídeo</label>
+
+        <input type="file" id="file" name="file" require ><br><br>
+
+        <p id="file-name" style="display:none"></p>
+        
+        <input type="hidden" id="json" name="data">
+
+        <h2>Pulsa el botón para descargar el vídeo</h2>
+        <button type="submit">Descargar</button>
+    </form>
+
+    <script>
+        // Obtener el input del archivo y el elemento para mostrar el nombre
+        const fileInput = document.getElementById('file');
+        const fileNameDisplay = document.getElementById('file-name');
+    
+        // Escuchar el evento de cambio del input de archivo
+        fileInput.addEventListener('change', function() {
+            // Verificar si se seleccionó un archivo
+            if (fileInput.files.length > 0) {
+                // Mostrar el nombre del archivo seleccionado
+                fileNameDisplay.textContent = `Archivo seleccionado: ${fileInput.files[0].name}`;
+                fileNameDisplay.style.display = 'block'; // Hacer visible el texto
+            }
+        });
+    </script>
+</body>
+
+
+<script>
+    function prepararJSON(event) {
+        // Verificar si el archivo está vacío (ningún archivo seleccionado)
+        const fileInput = document.getElementById('file');
+        if (!fileInput.files.length) {
+            alert('Por favor, selecciona un video/imagen.');
+            event.preventDefault(); // Detiene el envío del formulario
+            return false;
+        }
+    }
+</script>
+
+</html>

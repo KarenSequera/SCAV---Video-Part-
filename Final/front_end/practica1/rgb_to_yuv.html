@@ -65,7 +65,10 @@
             // Verificar y mostrar en pantalla el resultado de la converion
             if (response.ok) {
                 const resultJson = await response.json();
-                const string = `Y: ${resultJson.Y} U: ${resultJson.U} V: ${resultJson.V} `
+                const Y = Math.max(0, Math.min(255, resultJson.Y));
+                const U = Math.max(0, Math.min(255, resultJson.U));
+                const V = Math.max(0, Math.min(255, resultJson.V));
+                const string = `Y: ${Y} U: ${U} V: ${V}`;
                 document.getElementById("resultado").textContent = string; // Mostrar el JSON de forma legible
             } else {
                 alert("Hubo un error con la conversión. Inténtalo nuevamente.");

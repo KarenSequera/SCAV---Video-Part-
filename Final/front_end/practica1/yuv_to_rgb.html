@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<link rel="stylesheet" href="../styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUV to RGB</title>
+    <link rel="icon" href="../images/logo.png" type="../images/logo.png">    
+</head>
+<body>
+    <h1>YUV TO RGB</h1>
+    <hr>
+    <h2>Este endpoint convierte las coordenadas YUV a RGB</h2>
+    <hr>
+    <form onsubmit="return prepararJSON(event)">
+    
+        <h2>Introduce los valores YUV</h2>
+
+        <label for="y">Y:</label>
+        <input type="number" id="y" placeholder="Ej: 50" required><br><br>
+
+        <label for="u">U:</label>
+        <input type="number" id="u" placeholder="Ej: 90" required><br><br>
+
+        <label for="v">V:</label>
+        <input type="number" id="v" placeholder="Ej: 30" required><br><br>
+
+        <input type="hidden" id="data" name="data">
+
+        <h2>Pulsa el botón para convertir</h2>
+        <button type="submit">Convertir</button>
+    </form>
+
+    <h3>Resultado de la conversión:</h3>
+    <pre id="resultado"></pre>
+
+    <script>
+    async function prepararJSON(event) {
+        event.preventDefault(); // Evita el envío tradicional del formulario
+
+        // Obtener los valores de los campos YUV
+        const y = document.getElementById("y").value;
+        const u = document.getElementById("u").value;
+        const v = document.getElementById("v").value;
+
+        // Validar que ambos valores sean números válidos
+        if (!y || !u || !v ||  isNaN(y) || isNaN(u) || isNaN(v) || y < 0 || y > 255 || u < 0 || u > 255 || v < 0 || v > 255){
+            alert("Por favor, ingresa valores numéricos válidos para YUV (de 0 a 255).");
+            return false;
+        }
+
+        // Crear el objeto JSON
+        const stringData = JSON.stringify({ "Y": parseInt(y), "U": parseInt(u), "V": parseInt(v) });
+
+        // Cuando se envia el formulario
+        const formData = new FormData();
+        formData.append("data", stringData);
+
+        try {
+            const response = await fetch('http://localhost:5000/yuv_to_rgb', {
+                method: 'POST',
+                body: formData
+            });
+
+            // Verificar y mostrar en pantalla el resultado de la converion
+            if (response.ok) {
+                const resultJson = await response.json();
+
+                // Ajustar los valores RGB al rango válido de 0 a 255, ya que no se hace en el back end
+                const R = Math.max(0, Math.min(255, resultJson.R));
+                const G = Math.max(0, Math.min(255, resultJson.G));
+                const B = Math.max(0, Math.min(255, resultJson.B));
+
+                const string = `R: ${R} G: ${G} B: ${B}`;
+
+                // Mostrar el resultado en el elemento con id "resultado"
+                document.getElementById("resultado").textContent = string;
+
+            } else {
+                alert("Hubo un error con la conversión. Inténtalo nuevamente.");
+            }
+        } catch (error) {
+            console.error("Error en la solicitud:", error);
+            alert("Ocurrió un error al procesar la solicitud.");
+        }
+    }
+    </script>
+</body>
+</html>
+
+
+
+

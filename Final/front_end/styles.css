@@ -115,6 +115,24 @@ button {
     background-color: #C06C84;  /* Cambia el color al pasar el mouse */
 }
 
+/*Area de texto*/
+textarea {
+    width: 60%;
+    height: 150px;
+    padding: 10px;
+    font-size: 16px;
+    font-family: "Courier New", Courier, monospace; 
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; 
+    resize: vertical;
+    margin-top: 5px;
+}
+
+textarea:focus {
+    border-color: #C06C84; /* Cambia el color del borde cuando está enfocado */
+    outline: none; /* Elimina el borde por defecto al hacer clic */
+}
 
 /* Oculta el botón original del input file */
 input[type="file"] {

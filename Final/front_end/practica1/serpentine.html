@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<link rel="stylesheet" href="../styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lectura en Serpentine</title>
+    <link rel="icon" href="../images/logo.png" type="../images/logo.png">    
+</head>
+<body>
+    <h1>LECTURA EN SERPENTINE</h1>
+    <hr>
+    <h2>Este endpoint lee una matriz en serpentine</h2>
+    <hr>
+    <body>
+        <form onsubmit="return prepararJSON(event)">
+        
+            <h2>Introduce los valores de la matriz (en formato de lista de listas)</h2>
+    
+            <textarea id="matriz" placeholder="Ej: [[1,2,3], [4,5,6], [7,8,9]]" required></textarea><br><br>
+    
+            <input type="hidden" id="data" name="data">
+    
+            <h2>Pulsa el botón para obtener el orden serpentine</h2>
+            <button type="submit">Convertir</button>
+        </form>
+    
+        <h3>Resultado del orden serpentine:</h3>
+        <pre id="resultado"></pre>
+    
+        <script>
+        async function prepararJSON(event) {
+            event.preventDefault(); // Evita el envío tradicional del formulario
+    
+            // Obtener el valor de la matriz
+            const matrizStr = document.getElementById("matriz").value;
+    
+            // Validar que la matriz esté en el formato correcto
+            let matriz;
+            try {
+                matriz = JSON.parse(matrizStr);
+                if (!Array.isArray(matriz) || !matriz.every(row => Array.isArray(row))) {
+                    throw new Error("La matriz debe ser una lista de listas.");
+                }
+            } catch (error) {
+                alert("Por favor, ingresa una matriz en formato JSON válido.");
+                return false;
+            }
+    
+            // Crear el objeto JSON
+            const stringData = JSON.stringify({ "Matriz": matriz });
+    
+            // Cuando se envia el formulario
+            const formData = new FormData();
+            formData.append("data", stringData);
+    
+            try {
+                const response = await fetch('http://localhost:5000/serpentine', {
+                    method: 'POST',
+                    body: formData
+                });
+    
+                // Verificar y mostrar en pantalla el resultado de la conversión
+                if (response.ok) {
+                    const resultJson = await response.json();
+                    const string = resultJson.Output
+                    // Mostrar el resultado en el elemento con id "resultado"
+                    document.getElementById("resultado").textContent = string;
+    
+                } else {
+                    alert("Hubo un error con la conversión. Inténtalo nuevamente.");
+                }
+            } catch (error) {
+                console.error("Error en la solicitud:", error);
+                alert("Ocurrió un error al procesar la solicitud.");
+            }
+        }
+        </script>
+    </body>
+    </html>

@@ -10,6 +10,7 @@ from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 import unit_test
 from flask_cors import CORS
+import app_seminar2
 
 app_lab1 = Flask(__name__)
 CORS(app_lab1)
@@ -176,6 +177,7 @@ def serpentine():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
     
+    #[[1,2,6,7,14],[3,5,8,13,15],[4,9,12,16,19],[10,11,17,18,20]]
 ##############################################
 
 #Esta función implementa el run_lenght algoritmo presentado en las slides
@@ -231,21 +233,32 @@ def funcion_bw_converter(directorio_input, directorio_output):
 
 @app_lab1.route('/bw_converter', methods=['POST'])
 def bw_converter():
-    data = request.get_json() 
+    app_seminar2.delete_share_contents()
     try:
-        #Las imagenes tienen que estar localizadas en el directorio "shared", si no los contenedores no serán capaces de acceder a ellas
-        nombre_input = data['Nombre Input']
-        nombre_output =  data['Nombre Output'] 
         
-        directorio_input = "/shared_lab1/" + nombre_input
-        directorio_output = "/shared_lab1/" + nombre_output
+        #Extraer el archivo de la petición POST
+        if 'file' not in request.files:
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        
+        # Guardar el archivo dentro de la carpeta shared para que ffmpeg pueda acceder a el
+        input_ffmpeg_path = f"../shared_seminar2/{file.filename}"
+        file_extension = os.path.splitext(file.filename)[1]
+        file.save(input_ffmpeg_path)
 
-        funcion_bw_converter(directorio_input,directorio_output)
-        
-        return jsonify({
-            'Msj': f"La imagen en blanco y negro se encuentra en {directorio_output}",
-        })
-        
+        # Directorio del output
+        output_ffmpeg_path = f"../shared_seminar2/bw{file_extension}"
+
+        # Transforma el video al formato deseado 
+        funcion_bw_converter(input_ffmpeg_path, output_ffmpeg_path)
+
+        #Adapta al directorio de la aplicación de python
+        output_ffmpeg_path = f"../../shared_seminar2/bw{file_extension}"
+        #Se devuelve el archivo que ha producido ffmpeg
+        return send_file(output_ffmpeg_path, mimetype=f"video/{file_extension[1:]}", as_attachment=True, download_name=f"bw{file_extension}")
+
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
     
