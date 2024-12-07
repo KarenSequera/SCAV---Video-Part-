@@ -17,6 +17,21 @@ CORS(app_lab1)
 ###############################################################################
 ##################### LAB 1
 
+def delete_share_contents_dct():
+    directorio = "../shared_lab1/DCT"
+    #Iterar por los archivos del directorio
+    for archivo in os.listdir(directorio):
+        #Obtiene el directorio completo y los elimina
+        ruta_completa = os.path.join(directorio, archivo)
+        os.remove(ruta_completa) 
+def delete_share_contents_dwt():
+    directorio = "../shared_lab1/DWT"
+    #Iterar por los archivos del directorio
+    for archivo in os.listdir(directorio):
+        #Obtiene el directorio completo y los elimina
+        ruta_completa = os.path.join(directorio, archivo)
+        os.remove(ruta_completa) 
+
 ## RGB to YUV
 
 class Color_Translator:
@@ -330,13 +345,21 @@ class DCT_Encoder_Class:
 
 @app_lab1.route('/dct_encoder', methods=['POST'])
 def dct_encoder():
-    data = request.get_json() 
+    delete_share_contents_dct()
+    
     try:
         #Las imagenes tienen que estar localizadas en el directorio "shared", si no los contenedores no serán capaces de acceder a ellas
-        nombre_input = data['Nombre Input']
+        if 'file' not in request.files:
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        
+        directorio_input = f"../../shared_lab1/DCT/{file.filename}"
+        file.save(directorio_input)
+        # Directorio del output
+        directorio_output = f"../../shared_lab1/DCT/OutputDCT.png"
 
-        directorio_input = "/shared_lab1/" + nombre_input
-        directorio_output = "/shared_lab1/DCT/"
         imagen = (rgb2gray(imread(directorio_input)))
         imagen_encoded = DCT_Encoder_Class.metodo_encode(imagen)
         imagen_decoded = DCT_Encoder_Class.metodo_decode(imagen_encoded)
@@ -352,12 +375,11 @@ def dct_encoder():
         plt.subplot(133), plt.imshow(imagen_decoded), plt.axis('off'), plt.title('Imagen reconstruida (DCT+IDCT)', size=20)
 
         #En lugar de plt.show(), guardamos el grafico
-        plt.savefig(f'{directorio_output}outputDCT.png', bbox_inches='tight')
-        plt.close() 
+        plt.savefig(directorio_output, bbox_inches='tight')
+        plt.close()
 
-        return jsonify({
-            'Msj': f"El resultado se encuenta en el directorio{directorio_output}",
-        })
+        return send_file(directorio_output, mimetype='image/png', as_attachment=True, download_name="OuTput_DCT.png")
+
         
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
@@ -386,12 +408,20 @@ class DWT_Encoder_Class:
 
 @app_lab1.route('/dwt_encoder', methods=['POST'])
 def dwt_encoder():
-    data = request.get_json()
+    delete_share_contents_dwt() 
     try:
-        nombre_input = data['Nombre Input']
+        #Las imagenes tienen que estar localizadas en el directorio "shared", si no los contenedores no serán capaces de acceder a ellas
+        if 'file' not in request.files:
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        
+        directorio_input = f"../../shared_lab1/DWT/{file.filename}"
+        file.save(directorio_input)
+        # Directorio del output
+        directorio_output = f"../../shared_lab1/DWT/DWT_decomposición.png"
 
-        directorio_input = "/shared_lab1/" + nombre_input
-        directorio_output = "/shared_lab1/DWT/"
         imagen = (rgb2gray(imread(directorio_input)))
     
         imagen_encoded = DWT_Encoder_Class.metodo_encode(imagen)
@@ -404,7 +434,7 @@ def dwt_encoder():
         plt.subplot(122), plt.imshow(imagen_decoded), plt.axis('off'), plt.title('Imagen reconstruida (DWT+IDWT)', size=20)
 
         #En lugar de plt.show(), guardamos el grafico
-        plt.savefig(f'{directorio_output}outputDWT.png', bbox_inches='tight')
+        plt.savefig(directorio_output, bbox_inches='tight')
         plt.close()
 
         #Código para mostrar la decomposición 2D (extraido del blog)
@@ -419,12 +449,10 @@ def dwt_encoder():
             ax.set_yticks([])
 
         fig.tight_layout()
-        plt.savefig(f'{directorio_output}DWT_decomposición.png', bbox_inches='tight')
+        plt.savefig(directorio_output, bbox_inches='tight')
         plt.close()
-
-        return jsonify({
-            'Msj': f"El resultado se encuenta en el directorio{directorio_output}",
-        })
+        return send_file(directorio_output, mimetype='image/png', as_attachment=True, download_name="DWT_decomposición.png")
+        
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
 

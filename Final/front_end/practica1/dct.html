@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<link rel="stylesheet" href="../styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codificador DCT</title>
+    <link rel="icon" href="../images/logo.png" type="../images/logo.png">
+</head>
+<body>
+    <h1>CODIFICADOR DE IMAGEN DCT</h1>
+    <hr>
+    <h2>Este endpoint codifica la imagen a DCT</h2>
+    <hr>
+    <h2>Selecciona la imagen que deseas codificar</h2>
+
+    <form id="dct-form" enctype="multipart/form-data">
+        <label for="file" class="file-label">Seleccionar imagen</label>
+
+        <input type="file" id="file" name="file" required><br><br>
+
+        <p id="file-name" style="display:none"></p>
+        
+        <h2>Pulsa el botón para procesar la imagen</h2>
+        <button type="submit">Procesar</button>
+    </form>
+
+    <div id="output-container" style="display:none; text-align:center; margin-top:20px;">
+        <h2>Resultado de la DCT:</h2>
+        <img id="output-image" src="" alt="Imagen procesada" style="max-width: 80%; border: 1px solid #ccc; margin-bottom: 10px;">
+        <br>
+        <a id="download-link" href="" download="output_dct.png" style="display: none;" class="btn">Descargar Imagen</a>
+    </div>
+
+    <script>
+        // Obtener elementos del DOM
+        const fileInput = document.getElementById('file');
+        const fileNameDisplay = document.getElementById('file-name');
+        const form = document.getElementById('dct-form');
+        const outputContainer = document.getElementById('output-container');
+        const outputImage = document.getElementById('output-image');
+        const downloadLink = document.getElementById('download-link');
+    
+        // Mostrar nombre del archivo seleccionado
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = `Archivo seleccionado: ${fileInput.files[0].name}`;
+                fileNameDisplay.style.display = 'block';
+            }
+        });
+
+        // Manejar el envío del formulario
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevenir el envío tradicional del formulario
+
+            // Verificar si se seleccionó un archivo
+            if (!fileInput.files.length) {
+                alert('Por favor, selecciona un video/imagen.');
+                return;
+            }
+
+            // Crear el objeto FormData con el archivo seleccionado
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                // Hacer la solicitud POST a la API
+                const response = await fetch('http://localhost:5000/dct_encoder', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al procesar la imagen. Inténtalo de nuevo.');
+                }
+
+                // Convertir la respuesta en un Blob (imagen)
+                const imageBlob = await response.blob();
+
+                // Crear una URL para la imagen procesada
+                const imageUrl = URL.createObjectURL(imageBlob);
+
+                // Mostrar la imagen en la página
+                outputImage.src = imageUrl;
+                outputContainer.style.display = 'block';
+
+                // Configurar el enlace de descarga
+                downloadLink.href = imageUrl;
+                downloadLink.style.display = 'inline-block';
+
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    </script>
+</body>
+</html>

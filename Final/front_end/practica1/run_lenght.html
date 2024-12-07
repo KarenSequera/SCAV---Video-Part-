@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<link rel="stylesheet" href="../styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Length Encoding</title>
+    <link rel="icon" href="../images/logo.png" type="../images/logo.png">    
+</head>
+<body>
+    <h1>Run Length Encoding</h1>
+    <hr>
+    <h2>Este endpoint aplica el algoritmo de codificación Run Length</h2>
+    <hr>
+    <form id="runLengthForm" onsubmit="return prepararJSON(event)">
+    
+        <h2>Introduce la lista de datos</h2>
+
+        
+        <input type="text" id="dataStream" placeholder="Ej: 0,0,1,0,0,0,2,3" required><br><br>
+
+        <h2>Pulsa el botón para procesar</h2>
+        <button type="submit">Procesar</button>
+    </form>
+
+    <h3>Resultado del algoritmo:</h3>
+    <pre id="resultado"></pre>
+
+    <script>
+        async function prepararJSON(event) {
+            event.preventDefault(); // Evita el envío tradicional del formulario
+        
+            // Obtener el valor del campo Data Stream
+            const dataStream = document.getElementById("dataStream").value;
+        
+            // Validar que el valor sea una lista de números separados por comas
+            if (!dataStream || !/^\s*(-?\d+)(,\s*-?\d+)*\s*$/.test(dataStream)) {
+                alert("Por favor, ingresa una lista válida de números separados por comas.");
+                return false;
+            }
+        
+            // Crear el objeto JSON
+            const stringData = JSON.stringify({ "Data_stream": dataStream.split(',').map(Number) });
+        
+            // Cuando se envía el formulario
+            const formData = new FormData();
+            formData.append("data", stringData);
+        
+            try {
+                const response = await fetch('http://localhost:5000/run_lenght', {
+                    method: 'POST',
+                    body: formData
+                });
+        
+                // Verificar y mostrar en pantalla el resultado
+                if (response.ok) {
+                    const resultJson = await response.json();
+                    const output = resultJson.Output || "Sin resultados";
+        
+                    // Mostrar el resultado respetando los ceros iniciales
+                    const formattedOutput = output.map(item =>
+                        typeof item === 'string' && item.startsWith('0') ? item : String(item)
+                    );
+        
+                    document.getElementById("resultado").textContent = `${formattedOutput.join(' ')}`;
+                } else {
+                    alert("Hubo un error con el procesamiento. Inténtalo nuevamente.");
+                }
+            } catch (error) {
+                console.error("Error en la solicitud:", error);
+                alert("Ocurrió un error al procesar la solicitud.");
+            }
+        }
+    </script>
+        
+        
+        
+</body>
+</html>

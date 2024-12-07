@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VISUALIZADOR DE MOTION VECTORS</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="icon" href="../images/logo.png" type="image/png">
+
+</head>
+<body>
+    <h1>VISUALIZADOR DE MOTION VECTORS</h1>
+    <hr>
+    <h2>Este endpoint genera una versión del vídeo en donde se muestran los motion vectors</h2>
+    <hr>
+    <h2>Selecciona el vídeo al que deseas ver los motion vectors</h2>
+    <form id="video-form" action="http://localhost:5001/motion_vectors_macroblocks" method="POST" enctype="multipart/form-data">
+        <label for="file" class="file-label">Seleccionar vídeo</label>
+        <input type="file" id="file" name="file" required><br><br>
+        
+        <p id="file-name" style="display:none"></p>
+        
+        <h2>Pulsa el botón para obtener el vídeo con los motion vectors</h2>
+        <button type="submit">Motion Vectors Video</button>
+    </form>
+    <script>
+        const fileInput = document.getElementById('file');
+        const fileNameDisplay = document.getElementById('file-name');
+
+        // Mostrar el nombre del archivo seleccionado
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = `Archivo seleccionado: ${fileInput.files[0].name}`;
+                fileNameDisplay.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
