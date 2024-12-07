@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<link rel="stylesheet" href="../styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Tests</title>
+    <link rel="icon" href="../images/logo.png" type="../images/logo.png">
+</head>
+
+<body>
+    <h1>EJECUTA LOS UNIT TESTS</h1>
+    <hr>
+    <h2>Este endpoint ejecuta los tests unitarios y de procesamiento de imágenes.</h2>
+    <button id="run-tests-btn">Ejecutar Tests</button>
+
+    <div id="results-container">
+        <h2>Resultados de los Tests:</h2>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        document.getElementById('run-tests-btn').addEventListener('click', async () => {
+            const resultsContainer = document.getElementById('results-container');
+            const resultsElement = document.getElementById('results');
+
+            try {
+                // Hacer la solicitud GET al endpoint
+                const response = await fetch('http://localhost:5000/run_tests', {
+                    method: 'GET'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error en la solicitud: ${response.statusText}`);
+                }
+
+                // Parsear la respuesta como JSON
+                const results = await response.json();
+
+                // Limpiar los resultados previos
+                resultsElement.innerHTML = '';
+
+                // Mostrar resultados formateados
+                for (const [key, value] of Object.entries(results)) {
+                    const testResultDiv = document.createElement('div');
+                    testResultDiv.classList.add('test-result');
+                    
+                    const header = document.createElement('h3');
+                    header.textContent = key;
+                    testResultDiv.appendChild(header);
+
+                    const resultText = document.createElement('p');
+
+                    if (key.includes('Test')) {
+                        // Resultados de los tests unitarios
+                        resultText.innerHTML = `<strong>Pruebas ejecutadas:</strong> ${value.match(/(\d+)/g)[0]}<br>
+                                                <strong>Pruebas exitosas:</strong> ${value.match(/(\d+)/g)[1]}<br>
+                                                <strong>Fallos:</strong> ${value.match(/(\d+)/g)[2]}<br>
+                                                <strong>Errores:</strong> ${value.match(/(\d+)/g)[3]}`;
+                    } else {
+                        // Resultados de los tests de imágenes
+                        resultText.innerHTML = `<strong>${value}</strong>`;
+                    }
+
+                    testResultDiv.appendChild(resultText);
+                    resultsElement.appendChild(testResultDiv);
+                }
+
+                resultsContainer.style.display = 'block';
+            } catch (error) {
+                // Mostrar error si ocurre
+                const errorDiv = document.createElement('div');
+                errorDiv.classList.add('test-result');
+                errorDiv.textContent = `Error al ejecutar los tests: ${error.message}`;
+                resultsElement.appendChild(errorDiv);
+                resultsContainer.style.display = 'block';
+            }
+             
+        });
+    </script>
+</body>
+</html>

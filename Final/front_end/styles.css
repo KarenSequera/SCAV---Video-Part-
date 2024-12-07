@@ -192,3 +192,39 @@ input[type="file"] {
     grid-template-columns: repeat(3, 1fr); /* 4 columnas iguales */
     gap: 20px; /* Espacio entre las columnas */
 }
+
+#results-container {
+    margin-top: 20px;
+    display: none;
+}
+
+.test-result {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 80%; /* Ajusta el ancho a un 80% del contenedor padre */
+    max-width: 600px; /* Define un máximo para evitar que se haga demasiado grande */
+    margin-left: auto;
+    margin-right: auto; /* Centra el cuadro en la página */
+}
+
+.test-result h3 {
+    margin: 0;
+    color: #0056b3;
+}
+
+.test-result p {
+    margin: 5px 0;
+}
+
+.test-result a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.test-result a:hover {
+    text-decoration: underline;
+}
+
