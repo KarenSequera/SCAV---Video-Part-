@@ -14,16 +14,19 @@
     <h2>Este endpoint cuenta cuantas pistas de audio tiene un vídeo y genera un JSON con la información</h2>
     <hr>
     <h2>Selecciona el vídeo que deseas analizar </h2>
-    <form action="http://localhost:5001/get_numer_of_tracks" method="POST" enctype="multipart/form-data">
+    <form id="formData" onsubmit="return mostrarJSON(event)" enctype="multipart/form-data">
        
         <label for="file" class="file-label">Seleccionar video</label>
         <input type="file" id="file" name="file" required><br><br>
         <p id="file-name" style="display:none"></p>
-        <h2>Pulsa el botón para generar un JSON con los datos</h2>
-        <button type="submit">Generar JSON</button>
+        <h2>Pulsa el botón para obtener los datos</h2>
+        <button type="submit">Procesar</button>
         
     </form>
-    
+
+    <h3>Datos:</h3>
+    <pre id="resultado"></pre>
+
     <script>
         // Obtener el input del archivo y el elemento para mostrar el nombre
         const fileInput = document.getElementById('file');
@@ -40,5 +43,30 @@
         });
     </script>
 
+    <script>
+    // Enviar el archivo al backend y mostrar el JSON resultante
+    async function mostrarJSON(event) {
+        event.preventDefault(); // Prevenir la recarga de la página
+
+        const form = document.getElementById('formData');
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('http://localhost:5001/get_numer_of_tracks', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const resultJson = await response.json();
+            const string = `El archivo tiene ${resultJson.Number_of_tracks} pista/s de audio`;
+            document.getElementById("resultado").textContent = string;
+            
+        } catch (error) {
+            console.error("Error en la solicitud:", error);
+            alert("Ocurrió un error al procesar la solicitud.");
+        }
+    }
+    </script>
 </body>
+
 </html>

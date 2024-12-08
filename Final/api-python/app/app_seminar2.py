@@ -439,7 +439,7 @@ def get_numer_of_tracks():
         video_final_path = "../../shared_seminar2/number_of_tracks.txt"
         number_of_tracks = count_lines_txt(video_final_path)
 
-        return jsonify({'Number of tracks': str(number_of_tracks)}), 400
+        return jsonify({'Number_of_tracks': str(number_of_tracks)}), 400
 
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
