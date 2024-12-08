@@ -6,73 +6,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Container Creator</title>
     <link rel="icon" href="../images/logo.png" type="../images/logo.png">
-    
 </head>
 <body>
     <h1>CREADOR CONTENEDOR MP4</h1>
     <hr>
-    <h2>Este endpoint genera un contenedor mp4 que contiene una version de 20 segundos del video subido y el audio en tres formatos diferentes: aac mono,
-    mp3 estereo con el bitrate especificado y aac3.  </h2>
+    <h2>Este endpoint genera un contenedor mp4 que contiene una versión de 20 segundos del video subido y el audio en tres formatos diferentes: aac mono, mp3 estéreo con el bitrate especificado y aac3.</h2>
     <hr>
     <h2>Selecciona el vídeo de base</h2>
-    <form action="http://localhost:5001/video_container_creator" method="POST" enctype="multipart/form-data" onsubmit="return prepararJSON(event)">
+    <form id="containerForm" enctype="multipart/form-data">
         <label for="file" class="file-label">Seleccionar vídeo</label>
-        <input type="file" id="file" name="file" require ><br><br>
+        <input type="file" id="file" name="file" required><br><br>
 
         <p id="file-name" style="display:none"></p>
 
         <h2>Introduce el bitrate deseado para el audio mp3</h2>
         <label for="Bitrate">Bitrate: </label>
         <input type="text" id="data" placeholder="Ej: 31k" required><br><br>
-        <input type="hidden" id="json" name="data">
-        <h2>Pulsa el botón para descargar el contenedor</h2>
-        <button type="submit">Descargar</button>
+
+        <button type="submit">Procesar</button>
     </form>
 
+    <hr>
+    <h2>Vista previa del contenedor generado:</h2>
+    <video id="videoResult" controls style="display: none; max-width: 100%; max-height: 80vh; border: 2px solid #ccc; border-radius: 8px;"></video>
+    <a id="downloadLink" style="display: none; margin-top: 20px;" href="#" download>Descargar Video Procesado</a>
+
     <script>
-        // Obtener el input del archivo y el elemento para mostrar el nombre
+        // Mostrar nombre del archivo seleccionado
         const fileInput = document.getElementById('file');
         const fileNameDisplay = document.getElementById('file-name');
-    
-        // Escuchar el evento de cambio del input de archivo
-        fileInput.addEventListener('change', function() {
-            // Verificar si se seleccionó un archivo
+        fileInput.addEventListener('change', function () {
             if (fileInput.files.length > 0) {
-                // Mostrar el nombre del archivo seleccionado
                 fileNameDisplay.textContent = `Archivo seleccionado: ${fileInput.files[0].name}`;
-                fileNameDisplay.style.display = 'block'; // Hacer visible el texto
+                fileNameDisplay.style.display = 'block';
+            }
+        });
+
+        // Manejar el envío del formulario
+        document.getElementById('containerForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); // Evitar el envío tradicional del formulario
+
+            // Validar el archivo
+            if (!fileInput.files.length) {
+                alert('Por favor, selecciona un video.');
+                return;
+            }
+
+            // Obtener el bitrate
+            const bitrate = document.getElementById('data').value;
+
+            // Validar el bitrate
+            if (!bitrate) {
+                alert('Por favor, ingresa el bitrate.');
+                return;
+            }
+
+            // Crear FormData para enviar al servidor
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('data', JSON.stringify({ Bitrate: bitrate }));
+
+            try {
+                // Enviar solicitud al servidor
+                const response = await fetch('http://localhost:5001/video_container_creator', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al procesar el video.');
+                }
+
+                // Crear un blob del video resultante y mostrarlo
+                const videoBlob = await response.blob();
+                const videoUrl = URL.createObjectURL(videoBlob);
+
+                const videoElement = document.getElementById('videoResult');
+                videoElement.src = videoUrl;
+                videoElement.style.display = 'block'; // Mostrar el video
+
+                // Mostrar enlace de descarga
+                const downloadLink = document.getElementById('downloadLink');
+                downloadLink.href = videoUrl;
+                downloadLink.style.display = 'block'; // Mostrar el enlace para descargar
+            } catch (error) {
+                console.error(error);
+                alert('Ocurrió un error al procesar el video. Por favor, inténtalo nuevamente.');
             }
         });
     </script>
 </body>
-
-
-<script>
-    function prepararJSON(event) {
-        // Verificar si el archivo está vacío (ningún archivo seleccionado)
-        const fileInput = document.getElementById('file');
-        if (!fileInput.files.length) {
-            alert('Por favor, selecciona un video.');
-            event.preventDefault(); // Detiene el envío del formulario
-            return false;
-        }
-
-        // Obtener los valores del campo de bitrate
-        const bitrate = document.getElementById("data").value;
-        
-        // Validar que se haya introducido un valor
-        if (!bitrate) {
-            alert("Por favor, introduce el bitrate.");
-            event.preventDefault(); // Detiene el envío del formulario
-            return false;
-        }
-
-        // Crear el JSON con el chroma subsampling
-        const stringData = `{"Bitrate":"${bitrate}"}`;
-        document.getElementById("json").value = stringData;
-        return true;
-    }
-
-</script>
-
 </html>

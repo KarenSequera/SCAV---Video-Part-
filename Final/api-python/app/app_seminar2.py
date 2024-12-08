@@ -565,35 +565,39 @@ def video_convert(directorio_input, codec):
     directorio_output = f"../shared_seminar2/video_{codec}.mkv" 
 
     if codec == "vp8" or codec == "VP8":
-        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input, "-c:v", "libvpx", directorio_output]
+        # Asegurarse de que se copie el audio
+        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input, "-c:v", "libvpx", "-c:a", "copy", directorio_output]
         try: 
             subprocess.run(command, check=True)
         except:
             return jsonify({'Error': 'Error al generar el video'}), 400
         
     elif codec == "vp9" or codec == "VP9":
-        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input, "-c:v", "libvpx-vp9", directorio_output]
+        # Asegurarse de que se copie el audio
+        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input, "-c:v", "libvpx-vp9", "-c:a", "copy", directorio_output]
         try: 
             subprocess.run(command, check=True)
         except:
             return jsonify({'Error': 'Error al generar el video'}), 400
         
     elif codec == "h265" or codec == "H265":
-        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input, "-c:v", "libx265", directorio_output]
+        # Asegurarse de que se copie el audio
+        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input, "-c:v", "libx265", "-c:a", "copy", directorio_output]
         try: 
             subprocess.run(command, check=True)
         except:
             return jsonify({'Error': 'Error al generar el video'}), 400
         
     elif codec == "av1" or codec == "AV1":
-        #El encoder 'libaom-av1' es experimental para usarlo hay que poner las flags '-strict -2'
-        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input,"-c:v", "libaom-av1","-strict", "experimental", directorio_output]
+        # Asegurarse de que se copie el audio
+        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input,"-c:v", "libaom-av1","-strict", "experimental", "-c:a", "copy", directorio_output]
         try: 
             subprocess.run(command, check=True)
         except:
             return jsonify({'Error': 'Error al generar el video'}), 400
     else:
-         return jsonify({'Error': 'Codec no valido'}), 400 
+         return jsonify({'Error': 'Codec no valido'}), 400
+
     
 #Esta función genera un video en el formato especificado: VP8, VP9, h256 o AV1:
 # -Método: Post

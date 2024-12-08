@@ -62,8 +62,22 @@ button:hover, .file-label:hover {
     text-align: center;
 }
 
-/* Botones */
+video{
+    display: none; /* Ocultar el video inicialmente */
+    margin: 20px auto; /* Espaciado superior e inferior y centrado horizontal */
+    max-width: 100%; /* Ajuste para que no exceda el ancho del contenedor */
+    max-height: 80vh; /* Evitar que sea más alto que el 80% de la pantalla */
+    border: 2px solid #ccc; /* Opcional: borde decorativo */
+    border-radius: 8px; /* Opcional: bordes redondeados */
+}
 
+/* Excluye el video con la clase .visible-video */
+video.visible-video {
+    display: block; 
+}
+
+
+/* Botones */
 /* Contenedor de los botones */
 .button-container {
     display: flex;

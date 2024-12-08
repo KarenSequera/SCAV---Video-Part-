@@ -6,7 +6,6 @@
     <title>VISUALIZADOR DE MOTION VECTORS</title>
     <link rel="stylesheet" href="../styles.css">
     <link rel="icon" href="../images/logo.png" type="image/png">
-
 </head>
 <body>
     <h1>VISUALIZADOR DE MOTION VECTORS</h1>
@@ -14,7 +13,7 @@
     <h2>Este endpoint genera una versión del vídeo en donde se muestran los motion vectors</h2>
     <hr>
     <h2>Selecciona el vídeo al que deseas ver los motion vectors</h2>
-    <form id="video-form" action="http://localhost:5001/motion_vectors_macroblocks" method="POST" enctype="multipart/form-data">
+    <form id="video-form" enctype="multipart/form-data">
         <label for="file" class="file-label">Seleccionar vídeo</label>
         <input type="file" id="file" name="file" required><br><br>
         
@@ -23,15 +22,60 @@
         <h2>Pulsa el botón para obtener el vídeo con los motion vectors</h2>
         <button type="submit">Motion Vectors Video</button>
     </form>
+
+    <hr>
+    <h2>Vista previa del vídeo con los Motion Vectors:</h2>
+    <video id="videoResult" controls style="display: none; max-width: 100%; max-height: 80vh; border: 2px solid #ccc; border-radius: 8px;"></video>
+
     <script>
         const fileInput = document.getElementById('file');
         const fileNameDisplay = document.getElementById('file-name');
+        const videoResult = document.getElementById('videoResult');
 
         // Mostrar el nombre del archivo seleccionado
         fileInput.addEventListener('change', function() {
             if (fileInput.files.length > 0) {
                 fileNameDisplay.textContent = `Archivo seleccionado: ${fileInput.files[0].name}`;
                 fileNameDisplay.style.display = 'block';
+            }
+        });
+
+        // Manejar el envío del formulario
+        document.getElementById('video-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Evitar el envío tradicional del formulario
+
+            // Validar el archivo
+            if (!fileInput.files.length) {
+                alert('Por favor, selecciona un video.');
+                return;
+            }
+
+            // Crear FormData para enviar al servidor
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                // Enviar solicitud al servidor
+                const response = await fetch('http://localhost:5001/motion_vectors_macroblocks', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al procesar el video.');
+                }
+
+                // Crear un blob del video resultante y mostrarlo
+                const videoBlob = await response.blob();
+                const videoUrl = URL.createObjectURL(videoBlob);
+
+                // Mostrar el video procesado en la vista previa
+                videoResult.src = videoUrl;
+                videoResult.style.display = 'block'; // Mostrar el video
+
+            } catch (error) {
+                console.error(error);
+                alert('Ocurrió un error al procesar el video. Por favor, inténtalo nuevamente.');
             }
         });
     </script>

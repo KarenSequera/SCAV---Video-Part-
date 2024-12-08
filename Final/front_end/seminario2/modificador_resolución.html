@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modificador resolución</title>
     <link rel="icon" href="../images/logo.png" type="../images/logo.png">
-    
 </head>
 <body>
     <h1>MODIFICADOR RESOLUCIÓN</h1>
@@ -14,9 +13,9 @@
     <h2>Este endpoint genera una versión del vídeo en la resolución deseada</h2>
     <hr>
     <h2>Selecciona el vídeo al que deseas cambiar la resolución</h2>
-    <form action="http://localhost:5001/resolution_changer" method="POST" enctype="multipart/form-data" onsubmit="return prepararJSON(event)">
+    <form id="resolutionForm" enctype="multipart/form-data">
         <label for="file" class="file-label">Seleccionar vídeo</label>
-        <input type="file" id="file" name="file" require ><br><br>
+        <input type="file" id="file" name="file" required><br><br>
         
         <p id="file-name" style="display:none"></p>
 
@@ -28,57 +27,75 @@
         <label for="ancho">Ancho:</label>
         <input type="number" id="ancho" placeholder="Ej: 1280" required><br><br>
 
-        <input type="hidden" id="data" name="data">
-        <h2>Pulsa el botón para descargar el vídeo</h2>
-        <button type="submit">Descargar</button>
+        <button type="submit">Procesar</button>
     </form>
 
+    <hr>
+    <div>
+        <h2>Vista previa del video procesado:</h2>
+        <video id="videoResult" controls style="display: none; max-width: 100%; max-height: 80vh; border: 2px solid #ccc; border-radius: 8px;">
+        </video>
+    </div>
+
     <script>
-        // Obtener el input del archivo y el elemento para mostrar el nombre
+        // Mostrar nombre del archivo seleccionado
         const fileInput = document.getElementById('file');
         const fileNameDisplay = document.getElementById('file-name');
-    
-        // Escuchar el evento de cambio del input de archivo
-        fileInput.addEventListener('change', function() {
-            // Verificar si se seleccionó un archivo
+        fileInput.addEventListener('change', function () {
             if (fileInput.files.length > 0) {
-                // Mostrar el nombre del archivo seleccionado
                 fileNameDisplay.textContent = `Archivo seleccionado: ${fileInput.files[0].name}`;
-                fileNameDisplay.style.display = 'block'; // Hacer visible el texto
+                fileNameDisplay.style.display = 'block';
+            }
+        });
+
+        // Manejar el envío del formulario
+        document.getElementById('resolutionForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); // Evitar el envío tradicional del formulario
+
+            // Validar el archivo
+            if (!fileInput.files.length) {
+                alert('Por favor, selecciona un video.');
+                return;
+            }
+
+            // Obtener valores de ancho y alto
+            const alto = document.getElementById('alto').value;
+            const ancho = document.getElementById('ancho').value;
+
+            // Validar valores
+            if (!alto || !ancho || isNaN(alto) || isNaN(ancho)) {
+                alert('Por favor, ingresa valores numéricos válidos para Alto y Ancho.');
+                return;
+            }
+
+            // Crear FormData para enviar al servidor
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('data', JSON.stringify({ Alto: parseInt(alto), Ancho: parseInt(ancho) }));
+
+            try {
+                // Enviar solicitud al servidor
+                const response = await fetch('http://localhost:5001/resolution_changer', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al procesar el video.');
+                }
+
+                // Crear un blob del video resultante y mostrarlo
+                const videoBlob = await response.blob();
+                const videoUrl = URL.createObjectURL(videoBlob);
+
+                const videoElement = document.getElementById('videoResult');
+                videoElement.src = videoUrl;
+                videoElement.style.display = 'block'; // Mostrar el video
+            } catch (error) {
+                console.error(error);
+                alert('Ocurrió un error al procesar el video. Por favor, inténtalo nuevamente.');
             }
         });
     </script>
-    
 </body>
-
-
-<script>
-    function prepararJSON(event) {
-        // Verificar si el archivo está vacío (ningún archivo seleccionado)
-        const fileInput = document.getElementById('file');
-        if (!fileInput.files.length) {
-            alert('Por favor, selecciona un video.');
-            event.preventDefault(); // Detiene el envío del formulario
-            return false;
-        }
-
-        // Obtener los valores de los campos "Alto" y "Ancho"
-        const alto = document.getElementById("alto").value;
-        const ancho = document.getElementById("ancho").value;
-
-        // Validar que ambos valores sean números válidos
-        if (!alto || !ancho || isNaN(alto) || isNaN(ancho)) {
-            alert("Por favor, ingresa valores numéricos válidos para Alto y Ancho.");
-            event.preventDefault(); // Detiene el envío del formulario
-            return false;
-        }
-
-        // Crear el JSON con el alto y el ancho
-        const stringData = `{"Alto": ${alto}, "Ancho": ${ancho}}`;
-        document.getElementById("data").value = stringData;
-        return true;
-    }
-
-</script>
-
 </html>

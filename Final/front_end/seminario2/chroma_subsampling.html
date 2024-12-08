@@ -6,86 +6,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chroma Subsampling</title>
     <link rel="icon" href="../images/logo.png" type="../images/logo.png">
-    
 </head>
 <body>
     <h1>MODIFICADOR CHROMA SUBSAMPLING</h1>
     <hr>
-    <h2>Este endpoint genera una versión del vídeo en el chorma subsampling deseado</h2>
+    <h2>Este endpoint genera una versión del vídeo en el chroma subsampling deseado</h2>
     <hr>
     <h2>Selecciona el vídeo al que deseas cambiar el chroma subsampling</h2>
-    <form action="http://localhost:5001/chroma_subsampling_changer" method="POST" enctype="multipart/form-data" onsubmit="return prepararJSON(event)">
+    <form id="chromaForm" enctype="multipart/form-data">
         <label for="file" class="file-label">Seleccionar vídeo</label>
-        <input type="file" id="file" name="file" require ><br><br>
+        <input type="file" id="file" name="file" required><br><br>
 
         <p id="file-name" style="display:none"></p>
         
         <h2>Introduce el tipo de chroma subsampling</h2>
-        <label for="alto">Chroma Subsampling:</label>
+        <label for="chroma">Chroma Subsampling:</label>
         <input type="text" id="data" placeholder="Ej: yuv420p" required><br><br>
-        <input type="hidden" id="json" name="data">
 
-        
-
-        <h2>Pulsa el botón para descargar el vídeo</h2>
-        <button type="submit">Descargar</button>
+        <h2>Pulsa el botón para procesar el vídeo</h2>
+        <button type="submit">Procesar</button>
     </form>
-
+    <hr>
+    <div>
+        <h2>Vista previa del video procesado:</h2>
+    
+        <video id="videoResult" controls>
+    </div>
+    
     <script>
-        // Obtener el input del archivo y el elemento para mostrar el nombre
+        // Mostrar nombre del archivo seleccionado
         const fileInput = document.getElementById('file');
         const fileNameDisplay = document.getElementById('file-name');
-    
-        // Escuchar el evento de cambio del input de archivo
-        fileInput.addEventListener('change', function() {
-            // Verificar si se seleccionó un archivo
+        fileInput.addEventListener('change', function () {
             if (fileInput.files.length > 0) {
-                // Mostrar el nombre del archivo seleccionado
                 fileNameDisplay.textContent = `Archivo seleccionado: ${fileInput.files[0].name}`;
-                fileNameDisplay.style.display = 'block'; // Hacer visible el texto
+                fileNameDisplay.style.display = 'block';
+            }
+        });
+
+        // Enviar el formulario y manejar la respuesta
+        document.getElementById('chromaForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); // Evitar el envío tradicional del formulario
+
+            // Validar el archivo y el tipo de chroma
+            if (!fileInput.files.length) {
+                alert('Por favor, selecciona un video.');
+                return;
+            }
+
+            const chroma = document.getElementById('data').value;
+            const validChromaValues = [
+                "yuv420p",
+                "yuv422p",
+                "yuv444p",
+                "yuv420p10le",
+                "yuv422p10le",
+                "yuv444p10le"
+            ];
+            if (!validChromaValues.includes(chroma)) {
+                alert("Por favor, ingresa un valor de chroma subsampling válido (yuv420p, yuv422p, yuv444p, yuv420p10le, yuv422p10le, yuv444p10le).");
+                return;
+            }
+
+            // Crear un FormData para enviar al servidor
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('data', JSON.stringify({ Type: chroma }));
+
+            try {
+                // Enviar la solicitud al servidor
+                const response = await fetch('http://localhost:5001/chroma_subsampling_changer', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al procesar el video.');
+                }
+
+                // Crear un blob del video resultante y mostrarlo
+                const videoBlob = await response.blob();
+                const videoUrl = URL.createObjectURL(videoBlob);
+
+                const videoElement = document.getElementById('videoResult');
+                videoElement.src = videoUrl;
+                videoElement.style.display = 'block'; // Hacer visible el video
+            } catch (error) {
+                console.error(error);
+                alert('Ocurrió un error al procesar el video. Por favor, inténtalo nuevamente.');
             }
         });
     </script>
 </body>
-
-
-<script>
-    function prepararJSON(event) {
-        // Verificar si el archivo está vacío (ningún archivo seleccionado)
-        const fileInput = document.getElementById('file');
-        if (!fileInput.files.length) {
-            alert('Por favor, selecciona un video.');
-            event.preventDefault(); // Detiene el envío del formulario
-            return false;
-        }
-
-        // Obtener los valores del campo de chroma subsampling
-        const chroma = document.getElementById("data").value;
-        
-        //Subsamplings válidos sacados de la página web ffmpeg
-        const validChromaValues = [
-            "yuv420p",
-            "yuv422p",
-            "yuv444p",
-            "yuv420p10le",
-            "yuv422p10le",
-            "yuv444p10le"
-        ];
-
-
-        // Validar que ambos valores sean números válidos
-        if (!validChromaValues.includes(chroma)) {
-            alert("Por favor, ingresa un valor de chroma subsampling válido (yuv420p, yuv422p, yuv444p, yuv420p10le, yuv422p10le, yuv444p10le).");
-            event.preventDefault(); // Detiene el envío del formulario
-            return false;
-        }
-
-        // Crear el JSON con el chroma subsampling
-        const stringData = `{"Type": "${chroma}"}`;
-        document.getElementById("json").value = stringData;
-        return true;
-    }
-
-</script>
-
 </html>

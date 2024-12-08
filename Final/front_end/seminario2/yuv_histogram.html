@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
-<link rel="stylesheet" href="../styles.css">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Histogramas YUV</title>
+    <link rel="stylesheet" href="../styles.css">
     <link rel="icon" href="../images/logo.png" type="../images/logo.png">
-    
 </head>
 <body>
     <h1>GENERADOR HISTOGRAMAS YUV</h1>
@@ -14,29 +13,71 @@
     <h2>Este endpoint genera un overlay del vídeo subido con sus histogramas YUV</h2>
     <hr>
     <h2>Selecciona el vídeo del que deseas generar los histogramas YUV</h2>
-    <form action="http://localhost:5001/YUV_histograms" method="POST" enctype="multipart/form-data" onsubmit="return prepararJSON(event)">
+    <form id="video-form" enctype="multipart/form-data">
         <label for="file" class="file-label">Seleccionar vídeo</label>
-        <input type="file" id="file" name="file" require ><br><br>
+        <input type="file" id="file" name="file" required><br><br>
+        
         <p id="file-name" style="display:none"></p>
-        <h2>Pulsa el botón para descargar el vídeo</h2>
-        <button type="submit">Descargar</button>
+        
+        <h2>Pulsa el botón para obtener el vídeo con histogramas YUV</h2>
+        <button type="submit">Generar Video</button>
     </form>
 
+    <hr>
+    <h2>Vista previa del vídeo con los histogramas YUV:</h2>
+    <video id="videoResult" controls style="display: none; max-width: 100%; max-height: 80vh; border: 2px solid #ccc; border-radius: 8px;"></video>
+
     <script>
-        // Obtener el input del archivo y el elemento para mostrar el nombre
         const fileInput = document.getElementById('file');
         const fileNameDisplay = document.getElementById('file-name');
-    
-        // Escuchar el evento de cambio del input de archivo
+        const videoResult = document.getElementById('videoResult');
+
+        // Mostrar el nombre del archivo seleccionado
         fileInput.addEventListener('change', function() {
-            // Verificar si se seleccionó un archivo
             if (fileInput.files.length > 0) {
-                // Mostrar el nombre del archivo seleccionado
                 fileNameDisplay.textContent = `Archivo seleccionado: ${fileInput.files[0].name}`;
-                fileNameDisplay.style.display = 'block'; // Hacer visible el texto
+                fileNameDisplay.style.display = 'block';
+            }
+        });
+
+        // Manejar el envío del formulario
+        document.getElementById('video-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Evitar el envío tradicional del formulario
+
+            // Validar el archivo
+            if (!fileInput.files.length) {
+                alert('Por favor, selecciona un video.');
+                return;
+            }
+
+            // Crear FormData para enviar al servidor
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                // Enviar solicitud al servidor
+                const response = await fetch('http://localhost:5001/YUV_histograms', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al procesar el video.');
+                }
+
+                // Crear un blob del video resultante y mostrarlo
+                const videoBlob = await response.blob();
+                const videoUrl = URL.createObjectURL(videoBlob);
+
+                // Mostrar el video procesado en la vista previa
+                videoResult.src = videoUrl;
+                videoResult.style.display = 'block'; // Mostrar el video
+
+            } catch (error) {
+                console.error(error);
+                alert('Ocurrió un error al procesar el video. Por favor, inténtalo nuevamente.');
             }
         });
     </script>
 </body>
-
 </html>
