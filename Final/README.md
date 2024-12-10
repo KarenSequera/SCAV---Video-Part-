@@ -36,12 +36,12 @@ Como parte de la última práctica, uno de los ejercicios ha consistido en desar
 Una vez los contenedores de la API y el DOCKER están instanciados y el servidor HTTP está abierto en el puerto 8080, se puede acceder a la interfaz gráfica mediante cualquier navegador, accediendo a http://localhost:8080 para visualizar la página del indice.
 
 ![Captura de pantalla 2024-12-10 145556](https://github.com/user-attachments/assets/b3c54c99-ff6c-4b47-b3ff-afae9a7945b1)
-
+Dentro del índice se puede acceder a cualquier endpoint donde se muestran las indicaciones y el resultado, como por ejemplo en el siguiente endpoint:
 ![Captura de pantalla 2024-12-10 150035](https://github.com/user-attachments/assets/5f3578c2-00ca-4950-b0d8-55e0c26b11ea)
 
 Nota* El endpoint de la encoding ladder no interactúa directamente con la API. En su lugar, hemos almacenado la encoding ladder resultante de procesar el video de BBB a través de la API, y lo que hace la GUI es obtenerla mediante HLS y mostrarla en pantalla. 
 
-Nota** uno de los últimos ejercicios también ha consistido en realizar mejoras con IA. Hay un documento pdf explicando los cambios.
+Nota** Uno de los últimos ejercicios también ha consistido en realizar mejoras con IA. Hay un documento pdf explicando los cambios.
 
 # **ENDPOINTS LAB 1**
 
