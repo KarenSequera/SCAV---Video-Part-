@@ -269,7 +269,127 @@ def get_numer_of_tracks():
 
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
-     
+
+###################################
+
+def video_convert(directorio_input, codec):
+    directorio_output = f"../shared_seminar2/video_{codec}.mkv" 
+
+    if codec == "vp8" or codec == "VP8":
+        # Asegurarse de que se copie el audio
+        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input, "-c:v", "libvpx", "-c:a", "copy", directorio_output]
+        try: 
+            subprocess.run(command, check=True)
+        except:
+            return jsonify({'Error': 'Error al generar el video'}), 400
+        
+    elif codec == "vp9" or codec == "VP9":
+        # Asegurarse de que se copie el audio
+        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input, "-c:v", "libvpx-vp9", "-c:a", "copy", directorio_output]
+        try: 
+            subprocess.run(command, check=True)
+        except:
+            return jsonify({'Error': 'Error al generar el video'}), 400
+        
+    elif codec == "h265" or codec == "H265":
+        # Asegurarse de que se copie el audio
+        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input, "-c:v", "libx265", "-c:a", "copy", directorio_output]
+        try: 
+            subprocess.run(command, check=True)
+        except:
+            return jsonify({'Error': 'Error al generar el video'}), 400
+        
+    elif codec == "av1" or codec == "AV1":
+        # Asegurarse de que se copie el audio
+        command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-y", "-i", directorio_input,"-c:v", "libaom-av1","-strict", "experimental", "-c:a", "copy", directorio_output]
+        try: 
+            subprocess.run(command, check=True)
+        except:
+            return jsonify({'Error': 'Error al generar el video'}), 400
+    else:
+         return jsonify({'Error': 'Codec no valido'}), 400
+
+    
+
+@app_seminar2.route('/video_codec_converter', methods=['POST'])
+def video_codec_converter():
+    clean_directory(SHARED_DIR)
+    data = json.loads(request.form.get('data'))
+    try:
+        #Extraer el archivo de la petición POST
+        if 'file' not in request.files:
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        
+        # Guardar el archivo dentro de la carpeta shared para que ffmpeg pueda acceder a el
+        input_ffmpeg_path = f"../shared_seminar2/{file.filename}"
+        file.save(input_ffmpeg_path)
+
+        codec = data['Codec']
+        # Transforma el video al formato deseado 
+        video_convert(input_ffmpeg_path,codec)
+
+        directorio_output = f"../../shared_seminar2/video_{codec}.mkv"
+        #Se devuelve el archivo que ha producido ffmpeg
+        return send_file(directorio_output, mimetype='video/mp4', as_attachment=True, download_name=f"video_{codec}.mkv")
+
+    except (ValueError, TypeError) as e:
+        return jsonify({'error': str(e)}), 400
+
+def encoding_ladder_videos(directorio_input):
+    resoluciones = [[640,360],[1280,720],[1920,1080],[2560,1140]]
+
+    for i in resoluciones:
+        ancho = i[0]
+        alto = i[1]
+        directorio_output = f"../shared_seminar2/video_{ancho}x{alto}.mp4" 
+        app_lab1.funcion_resolution_changer(directorio_input, directorio_output, ancho, alto)
+
+def encoding_ladder_master():
+    clean_directory(ENCODING_LADDER_DIR)
+    resoluciones = [[640,360],[1280,720],[1920,1080],[2560,1140]]
+    master_path = '../encoding_ladder/master_%v.m3u8' 
+    directorios = [f"../shared_seminar2/video_{i[0]}x{i[1]}.mp4" for i in resoluciones]
+    command = ["docker", "exec", "contenedor_ffmpeg", "ffmpeg", "-i", directorios[0], "-i", directorios[1],"-i", directorios[2],"-i", directorios[3],
+               "-map", "0:v", "-map", "1:v", "-map", "2:v", "-map", "3:v",
+            "-map", "0:a", "-map", "0:a", "-map", "0:a", "-map", "0:a",
+            "-c:v", "copy", "-c:a", "copy",
+            "-f", "hls", "-var_stream_map", "v:0,a:0 v:1,a:1 v:2,a:2 v:3,a:3",
+            "-hls_time", "10", "-hls_playlist_type", "vod",
+            "-master_pl_name", "master.m3u8", master_path]
+    try: 
+        subprocess.run(command, check=True)        
+    except:
+        return jsonify({'Error': 'Error al generar el video'}), 400
+        
+
+@app_seminar2.route('/encoding_ladder_creator', methods=['POST'])
+def encoding_ladder_creator():
+    clean_directory(SHARED_DIR)
+    try:
+        #Extraer el archivo de la petición POST
+        if 'file' not in request.files:
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "La petición no tiene ningún archivo"}), 400
+        
+        # Guardar el archivo dentro de la carpeta shared para que ffmpeg pueda acceder a el
+        input_ffmpeg_path = f"../shared_seminar2/{file.filename}"
+        file.save(input_ffmpeg_path)
+
+        # Transforma el video al formato deseado 
+        encoding_ladder_videos(input_ffmpeg_path)
+        encoding_ladder_master()
+
+        #Se devuelve el archivo que ha producido ffmpeg
+        return  jsonify({'Output': 'El resultado se encuentra en el /encoding_ladder'}), 400
+
+    except (ValueError, TypeError) as e:
+        return jsonify({'error': str(e)}), 400
+
 
 if __name__ == '__main__':
     app_seminar2.run(host="0.0.0.0", port=5001)

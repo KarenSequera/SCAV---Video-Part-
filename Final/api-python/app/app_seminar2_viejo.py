@@ -633,7 +633,12 @@ def video_codec_converter():
         return jsonify({'error': str(e)}), 400
 
 
-##################### 1)
+#curl --location "http://localhost:5001/video_codec_converter" ^
+#    --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+#   --form "data={\"Codec\":\"VP8\"}" ^
+#   --output output_file.mp4
+
+##################### 2)
 
 def encoding_ladder_videos(directorio_input):
     resoluciones = [[640,360],[1280,720],[1920,1080],[2560,1140]]
@@ -688,6 +693,9 @@ def encoding_ladder_creator():
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
 
+#curl --location "http://localhost:5001/encoding_ladder_creator" ^
+#    --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+#   --output output_file.json
 
 if __name__ == '__main__':
     app_seminar2.run(host="0.0.0.0", port=5001)
