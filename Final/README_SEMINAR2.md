@@ -2,7 +2,7 @@
 
 Este proyecto se basa en el desarrollo de técnicas y algoritmos de compresión con la finalidad de poder comprimir vídeos. Para esto usaremos una API desarrollada en Python utilizando Flask y librería ffmpeg para procesar imágenes/videos. 
 
-Para la API hemos usado el framework de Flask, ya que teníamos experiencia de otros trabajos. Para mantener el código ordenado y más limpio, todos los nuevos ejercicios del Seminario 2 se encuentran en un archivo separado y se usa el puerto 5001 para acceder a los endpoints. Si se quiere acceder a los endpoints del Lab 1, hay que usar el puerto 5000.
+Para la API hemos usado el framework de Flask, ya que teníamos experiencia de otros trabajos. Para mantener el código ordenado y más limpio, todos los nuevos ejercicios apartir del Seminario 2 se encuentran en un archivo separado y se usa el puerto 5001 para acceder a los endpoints. Si se quiere acceder a los endpoints del Lab 1, hay que usar el puerto 5000.
 
 La API está dentro de un contenedor con base Linux Ubuntu, con todas las dependencias necesarias para ejecutarse y tiene abierto el puerto 5000 y 5001 para poder interactuar con ella. Esta, se conecta con otro contenedor que contiene ffmpeg (tambien con base Linux Ubuntu) para realizar algunas operaciones. Para poder instanciar los contenedores correctamente, permitir que se comuniquen entre sí y darles acceso a los directorios compartidos dónde se almacenan los inputs y los outputs, se ha creado un archivo de configuración llamado docker-compose.yml. Este archivo contiene toda la información necesaria para configurar, montar y gestionar los contenedores: se especifica la localización de las diferentes dockerfiles, las interfaces de redes (para que se puedan comunicar) y volúmenes (dónde se montan la carpetas locales a los contenedores). Los ejercicios del Lab1 necesitan que el input se encuentra en la carpeta compartida /shared_lab1/ y almacenará los outputs también en esa carpeta. Sin embargo, para este nuevo seminario hemos conseguido que la API obtenga el archivo directamente de la petición POST y sea capaz de enviar el output deseado en la respuesta. Cuando se sube un archivo, se almacena en la carpera /shared_seminar2/, donde también se almacenan el output del contenedor FFMPEG que despues la API envía al usuario. Cada vez que se llama a un endpoint del seminario 2 los contenidos de la carpeta /shared_seminar2/ se eliminan para que no acomule videos que ya no tienen utilidad. 
 
@@ -16,16 +16,33 @@ Para poder usarlo primero se tiene que clonar el repositorio de manera local con
 $ git clone <ruta del repositorio> 
 Los contenidos de este seminario (acomulativos sobre los del Lab1) se encuentran dentro de la carpeta Seminario 2:
 
-			        $ cd Seminar2
+			     					   $ cd Seminar2
              
 Para instanciar los contenedores usando el archivo de configuración hay que ejecutar:
 
-                          $ docker-compose up
+                      					         $ docker-compose up
               
 Si es la primera vez que se ejecuta, puede tardar en instalar todas las dependencias de la API. Si ya se ha ejecutado anteriormente, usará la memoria caché para agilizar el proceso. 
 Al terminar, se habrán creado las dos imágenes y las dos instancias de los contenedores, estando ahora estos activos. Ya se puede interactuar con la API mediante peticiones POST (en el caso de las funciones) y GET (para el unit test). 
  
 A continuación incluimos un ejemplo de petición (en PowerShell) para cada uno de los endpoints y el output que da la API.
+
+## **INTERFAZ GRÁFICA**
+Como parte de la última práctica, uno de los ejercicios ha consistido en desarrollar una interfaz gráfica para interactuar con la API. La interfaz ha sido desarrollada en HTML. Para acceder a ella es necesario abrir un servidor HTTP dentro de la carpeta front_end del projecto. Es importante que el servidor este servido en el puerto 8080, ya que las URLs usadas para navegar por las páginas de la interfaz usan este puerto. Las páginas se han organizado en carpetas con el nombre correspondiente a la práctica/seminario al que pertenecen. Hay una página por endpoint.
+
+								        $ cd front_end
+								        $ cd Seminar2
+								$   python -m http.server 8080
+	
+Una vez los contenedores de la API y el DOCKER están instanciados y el servidor HTTP está abierto en el puerto 8080, se puede acceder a la interfaz gráfica mediante cualquier navegador, accediendo a http://localhost:8080 para visualizar la página del indice.
+
+![Captura de pantalla 2024-12-10 145556](https://github.com/user-attachments/assets/b3c54c99-ff6c-4b47-b3ff-afae9a7945b1)
+
+![Captura de pantalla 2024-12-10 150035](https://github.com/user-attachments/assets/5f3578c2-00ca-4950-b0d8-55e0c26b11ea)
+
+Nota* El endpoint de la encoding ladder no interactúa directamente con la API. En su lugar, hemos almacenado la encoding ladder resultante de procesar el video de BBB a través de la API, y lo que hace la GUI es obtenerla mediante HLS y mostrarla en pantalla. 
+
+Nota** uno de los últimos ejercicios también ha consistido en realizar mejoras con IA. Hay un documento pdf explicando los cambios.
 
 # **ENDPOINTS LAB 1**
 
@@ -318,10 +335,10 @@ Este endpoint recibe un video en el campo "file" y la resolución deseada en for
 
 Ejemplo de petición usando curl en la CMD:
 
-      curl --location "http://localhost:5001/resolution_changer" ^
-    --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
-    --form "data={\"Alto\":\"100\",\"Ancho\":100}" ^
-    --output output_file.mp4
+					      curl --location "http://localhost:5001/resolution_changer" ^
+					    --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+					    --form "data={\"Alto\":\"100\",\"Ancho\":100}" ^
+					    --output output_file.mp4
 
 
 ### **/chroma_subsampling_changer POST**
@@ -330,10 +347,10 @@ Este endpoint recibe un video en el campo "file" y el tipo de chroma subsampling
 
 Ejemplo de petición usando curl en la CMD:
 
-     #curl --location "http://localhost:5001/chroma_subsampling_changer" ^
-     --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
-     --form "data={\"Type\":\"yuv420p\"}" ^
-     --output output_file.mp4
+					     curl --location "http://localhost:5001/chroma_subsampling_changer" ^
+					     --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+					     --form "data={\"Type\":\"yuv420p\"}" ^
+					     --output output_file.mp4
 
 ### **/video_info POST**
 
@@ -341,10 +358,9 @@ Este endpoint recibe un video en el campo de "file" y devuelve un json con 5 dat
 
 Ejemplo de petición usando curl en la CMD:
 
-     #curl --location "http://localhost:5001/chroma_subsampling_changer" ^
-     --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
-     --form "data={\"Type\":\"yuv420p\"}" ^
-     --output output_file.mp4
+					     curl --location "http://localhost:5001/video_info" ^
+					     --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+					     --output output_file.json
 
 Ejemplo de output:
 
@@ -362,10 +378,10 @@ Este endpoint recibe un video en el campo de "file" y un bitrate en formato json
 
 Ejemplo de petición usando curl en la CMD:
 
-     curl --location "http://localhost:5001/video_container_creator" ^
-     --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
-     --form "data={\"Bitrate\":\"32k\"}" ^
-     --output output_file.mp4
+						     curl --location "http://localhost:5001/video_container_creator" ^
+						     --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+						     --form "data={\"Bitrate\":\"32k\"}" ^
+						     --output output_file.mp4
 
 ### **/get_numer_of_tracks POST**
 
@@ -373,9 +389,9 @@ Este endpoint recibe un video en el campo de "file" y devuelve un archivo json q
 
 Ejemplo de petición usando curl en la CMD:
 
-      curl --location "http://localhost:5001/get_numer_of_tracks" ^
-      --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
-      --output output_file.json
+					      curl --location "http://localhost:5001/get_numer_of_tracks" ^
+					      --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+					      --output output_file.json
       
 Ejemplo de output:
 
@@ -389,12 +405,33 @@ Este endpoint recibe un video en el campo de "file" y devuelve una versión del 
 
 Ejemplo de petición usando curl en la CMD:
 
-      curl --location "http://localhost:5001/motion_vectors_macroblocks" ^
-      --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
-      --output output_file.mp4
+					      curl --location "http://localhost:5001/motion_vectors_macroblocks" ^
+					      --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+					      --output output_file.mp4
 
 ### **/YUV_histograms POST**
 
 Este endpoint recibe un video en el campo de "file" y devuelve una versión del video los histogramas YUV. Para este endpoint se recomienda el de POSTMAN!
 
       ![Captura de pantalla 2024-11-27 200225](https://github.com/user-attachments/assets/e19cd932-1c31-4299-9a55-5a4fbfd0456a)
+
+# **ENDPOINTS PRÁCTICA 2**
+
+También se han añadido al repositorio de postman
+ 
+### **/video_codec_converter POST**
+
+Este endpoint recibe un video en el campo de "file" y un tipo de codec en formato json (ej. {"Codec":"VP8"}) en el campo de "data".
+
+					      curl --location "http://localhost:5001/video_codec_converter" ^
+					    --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+					    --form "data={\"Codec\":\"VP8\"}" ^
+					    --output output_file.mp4
+				      
+### **/encoding_ladder_creator POST**
+
+Este endpoint recibe un video en el campo de "file" y crea una encodding ladder con resoluciones 640x360, 1280x720, 1920x1080 y 2560x1140 dentro del directorio /encoding_ladder. 
+
+					      curl --location "http://localhost:5001/encoding_ladder_creator" ^
+	     				     --form "file=@C:/Users/karen/Downloads/BBC20s_package.mp4" ^
+	       					--output output_file.json
