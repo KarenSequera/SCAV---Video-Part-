@@ -31,7 +31,6 @@ A continuación incluimos un ejemplo de petición (en PowerShell) para cada uno 
 Como parte de la última práctica, uno de los ejercicios ha consistido en desarrollar una interfaz gráfica para interactuar con la API. La interfaz ha sido desarrollada en HTML. Para acceder a ella es necesario abrir un servidor HTTP dentro de la carpeta front_end del projecto. Es importante que el servidor este servido en el puerto 8080, ya que las URLs usadas para navegar por las páginas de la interfaz usan este puerto. Las páginas se han organizado en carpetas con el nombre correspondiente a la práctica/seminario al que pertenecen. Hay una página por endpoint.
 
 								        $ cd front_end
-								        $ cd Seminar2
 								$   python -m http.server 8080
 	
 Una vez los contenedores de la API y el DOCKER están instanciados y el servidor HTTP está abierto en el puerto 8080, se puede acceder a la interfaz gráfica mediante cualquier navegador, accediendo a http://localhost:8080 para visualizar la página del indice.
