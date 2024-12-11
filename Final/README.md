@@ -1,4 +1,4 @@
-# **Readme API Seminar 2**
+# **Readme**
 
 Este proyecto se basa en el desarrollo de técnicas y algoritmos de compresión con la finalidad de poder comprimir vídeos. Para esto usaremos una API desarrollada en Python utilizando Flask y librería ffmpeg para procesar imágenes/videos. 
 
@@ -14,9 +14,9 @@ A continuación, se describen la utilización y las principales funciones de est
 
 Para poder usarlo primero se tiene que clonar el repositorio de manera local con el comando:
 $ git clone <ruta del repositorio> 
-Los contenidos de este seminario (acomulativos sobre los del Lab1) se encuentran dentro de la carpeta Seminario 2:
+Los contenidos de la entrega final (es decir, todo el proyecto acabado) se encuentran en la carpeta Final:
 
-			     					   $ cd Seminar2
+			     					   $ cd Final
              
 Para instanciar los contenedores usando el archivo de configuración hay que ejecutar:
 
@@ -25,8 +25,6 @@ Para instanciar los contenedores usando el archivo de configuración hay que eje
 Si es la primera vez que se ejecuta, puede tardar en instalar todas las dependencias de la API. Si ya se ha ejecutado anteriormente, usará la memoria caché para agilizar el proceso. 
 Al terminar, se habrán creado las dos imágenes y las dos instancias de los contenedores, estando ahora estos activos. Ya se puede interactuar con la API mediante peticiones POST (en el caso de las funciones) y GET (para el unit test). 
  
-A continuación incluimos un ejemplo de petición (en PowerShell) para cada uno de los endpoints y el output que da la API.
-
 ## **INTERFAZ GRÁFICA**
 Como parte de la última práctica, uno de los ejercicios ha consistido en desarrollar una interfaz gráfica para interactuar con la API. La interfaz ha sido desarrollada en HTML. Para acceder a ella es necesario abrir un servidor HTTP dentro de la carpeta front_end del projecto. Es importante que el servidor este servido en el puerto 8080, ya que las URLs usadas para navegar por las páginas de la interfaz usan este puerto. Las páginas se han organizado en carpetas con el nombre correspondiente a la práctica/seminario al que pertenecen. Hay una página por endpoint.
 
