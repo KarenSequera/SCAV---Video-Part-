@@ -263,8 +263,6 @@ Dada el nombre de una imagen de input (tiene que estar guardada dentro de la car
     ParsedHtml        : mshtml.HTMLDocumentClass
     RawContentLength  : 64
 
-
-
 ### **/dwt_encoder POST** 
 
 Dada el nombre de una imagen de input (tiene que estar guardada dentro de la carpeta /share/), este endpoint codifica la imagen usando la dwt y la descodifica. Después, genera una imagen que contiene la original y la reconstruida para poder compararlas. Además, también genera una imagen que contiene la descomposición en LL, LH, HL y HH de la DWT. Devuelve el directorio dónde se encuentran las imágenes generadas. Ejemplo:
@@ -295,7 +293,21 @@ Dada el nombre de una imagen de input (tiene que estar guardada dentro de la car
     ParsedHtml        : mshtml.HTMLDocumentClass
     RawContentLength  : 64
 
+Hay que mencionar que para poder usar estos endpoints, /dct_encoder y /dwt_encoder, a la hora de hacer la parte de la interfaz gráfica hemos adaptado estas funciónes para mejorar su usabilidad. Para ello hemos hecho que el usuario pueda seleccionar un archivo directamente como input desde su dispositivo sin necesidad de tenerlo en una carpeta específica. Este archivo se guardara en la carpeta de DCT o DWT, segun el endpoint que se use, igual que el output que se genere. Además, hemos añadido que al terminar la función los archivos generados se eliminen para evitar que se acumulen archivos innecesarios. 
 
+Para comprobar el funcionamiento de las funciones hemos usado POSTMAN. Hemos usando como input el campo "file" donde subimos una imagen que seleccionamos, la cual junto con el ouput que genere se guarda en la carpeta correspondiente y, además, se muestra el output generado por pantalla.  
+
+Ejemplo de petición de la DCT usando curl en la CMD:
+
+						     curl --location "http://localhost:5000/dct_encoder" ^
+						     --form "file=@C:/Users/karen/Downloads/input.jpg" ^
+						     --output outputDCT.png
+
+Ejemplo de petición de la DWT usando curl en la CMD:
+
+						     curl --location "http://localhost:5000/dwt_encoder" ^
+						     --form "file=@C:/Users/karen/Downloads/input.jpg" ^
+						     --output DWT_decomposición.png
 
 ### **/run_test GET**
 
